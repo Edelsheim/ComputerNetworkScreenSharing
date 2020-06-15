@@ -1,5 +1,9 @@
 # Visual Studio
 .vs
+Debug
+Release
+*.aps
+
 # Prerequisites
 *.d
 
