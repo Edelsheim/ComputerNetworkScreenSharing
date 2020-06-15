@@ -13,6 +13,8 @@
 #endif
 
 
+#include "MessageQueue.h"
+
 // 응용 프로그램 정보에 사용되는 CAboutDlg 대화 상자입니다.
 
 class CAboutDlg : public CDialogEx
@@ -65,6 +67,7 @@ BEGIN_MESSAGE_MAP(CComputerNetworkScreenSharingDlg, CDialogEx)
 	ON_WM_SYSCOMMAND()
 	ON_WM_PAINT()
 	ON_WM_QUERYDRAGICON()
+	ON_MESSAGE(WM_POP, &CComputerNetworkScreenSharingDlg::OnPop)
 END_MESSAGE_MAP()
 
 
@@ -153,3 +156,12 @@ HCURSOR CComputerNetworkScreenSharingDlg::OnQueryDragIcon()
 	return static_cast<HCURSOR>(m_hIcon);
 }
 
+afx_msg LRESULT CComputerNetworkScreenSharingDlg::OnPop(WPARAM wParam, LPARAM lParam)
+{
+	LPCTSTR message = MessageQueue::GetInstance()->Pop().c_str();
+
+	//
+	// do log
+	//
+	return 0;
+}

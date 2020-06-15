@@ -10,4 +10,6 @@
 // 여기에 미리 컴파일하려는 헤더 추가
 #include "framework.h"
 
+#define WM_POP WM_APP + 1
+
 #endif //PCH_H

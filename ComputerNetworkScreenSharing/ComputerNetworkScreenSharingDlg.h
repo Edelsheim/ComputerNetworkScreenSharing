@@ -14,7 +14,7 @@ public:
 
 // 대화 상자 데이터입니다.
 #ifdef AFX_DESIGN_TIME
-	enum { IDD = IDD_COMPUTERNETWORKSCREENSHARING_DIALOG };
+	enum { IDD = IDD_Main_DIALOG };
 #endif
 
 	protected:
@@ -31,4 +31,5 @@ protected:
 	afx_msg void OnPaint();
 	afx_msg HCURSOR OnQueryDragIcon();
 	DECLARE_MESSAGE_MAP()
+	afx_msg LRESULT OnPop(WPARAM wParam, LPARAM lParam);
 };
