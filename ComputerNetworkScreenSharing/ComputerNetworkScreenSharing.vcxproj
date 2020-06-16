@@ -183,6 +183,8 @@
     </ResourceCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="CClient.h" />
+    <ClInclude Include="CListenSocket.h" />
     <ClInclude Include="ComputerNetworkScreenSharing.h" />
     <ClInclude Include="ComputerNetworkScreenSharingDlg.h" />
     <ClInclude Include="framework.h" />
@@ -192,6 +194,8 @@
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="CClient.cpp" />
+    <ClCompile Include="CListenSocket.cpp" />
     <ClCompile Include="ComputerNetworkScreenSharing.cpp" />
     <ClCompile Include="ComputerNetworkScreenSharingDlg.cpp" />
     <ClCompile Include="pch.cpp">
