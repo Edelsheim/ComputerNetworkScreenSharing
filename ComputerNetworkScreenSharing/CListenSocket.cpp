@@ -7,8 +7,9 @@
 // https://afsdzvcx123.tistory.com/98
 //
 
-CListenSocket::CListenSocket()
+CListenSocket::CListenSocket() : CAsyncSocket()
 {
+	AfxSocketInit();
 }
 
 CListenSocket::~CListenSocket()
