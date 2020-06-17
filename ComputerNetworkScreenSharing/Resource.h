@@ -6,17 +6,26 @@
 #define IDD_ABOUTBOX                    100
 #define IDS_ABOUTBOX                    101
 #define IDD_Main_DIALOG                 102
+#define IDS_DefaultServerPort           102
+#define IDS_DefaultConnectIP            103
 #define IDR_MAINFRAME                   128
 #define IDD_Draw                        132
+#define IDS_DefaultConnectPort          135
 #define IDC_PicCon                      1001
+#define IDC_ServerRunButton             1003
+#define IDC_ServerPort                  1004
+#define IDC_ConnectIP                   1006
+#define IDC_ConnectPort                 1007
+#define IDC_ConnectButton               1008
+#define IDC_LogList                     1009
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        134
+#define _APS_NEXT_RESOURCE_VALUE        137
 #define _APS_NEXT_COMMAND_VALUE         32771
-#define _APS_NEXT_CONTROL_VALUE         1003
+#define _APS_NEXT_CONTROL_VALUE         1010
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

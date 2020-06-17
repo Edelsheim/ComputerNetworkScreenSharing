@@ -185,9 +185,11 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="CClient.h" />
+    <ClInclude Include="CClientSocket.h" />
     <ClInclude Include="CListenSocket.h" />
     <ClInclude Include="ComputerNetworkScreenSharing.h" />
     <ClInclude Include="ComputerNetworkScreenSharingDlg.h" />
+    <ClInclude Include="DrawingQueue.h" />
     <ClInclude Include="DrawingView.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="MessageQueue.h" />
@@ -198,6 +200,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="CClient.cpp" />
+    <ClCompile Include="CClientSocket.cpp" />
     <ClCompile Include="CListenSocket.cpp" />
     <ClCompile Include="ComputerNetworkScreenSharing.cpp" />
     <ClCompile Include="ComputerNetworkScreenSharingDlg.cpp" />

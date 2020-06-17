@@ -2,6 +2,8 @@
 #include "CClient.h"
 #include "CListenSocket.h"
 
+
+
 //
 // https://afsdzvcx123.tistory.com/98
 //
@@ -34,15 +36,22 @@ void CClient::OnReceive(int nErrorCode)
 	GetPeerName(peerIP, peerPort);
 
 	// receive
-	char point_buff[10];
-	ZeroMemory(point_buff, 10);
+	CPoint point_buff;
+	//ZeroMemory(point_buff, 254);
 
 	int len = 0;
-	if ((len = Receive(point_buff, 10)) > 0)
+	if ((len = Receive(&point_buff, sizeof(point_buff))) > 0)
 	{
 		CListenSocket* serverSocket = (CListenSocket*)this->serverSocket;
-		serverSocket->BroadCast(point_buff, len);
+		serverSocket->BroadCast(&point_buff, len);
 	}
 	//
 	CSocket::OnReceive(nErrorCode);
+}
+
+
+void CClient::OnSend(int nErrorCode)
+{
+
+	CSocket::OnSend(nErrorCode);
 }

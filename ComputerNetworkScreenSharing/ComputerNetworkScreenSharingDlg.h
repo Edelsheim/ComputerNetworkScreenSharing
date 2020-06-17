@@ -4,6 +4,9 @@
 
 #pragma once
 
+#include "CListenSocket.h"
+#include "DrawingView.h"
+
 // CComputerNetworkScreenSharingDlg 대화 상자
 class CComputerNetworkScreenSharingDlg : public CDialogEx
 {
@@ -25,12 +28,44 @@ protected:
 	HICON m_hIcon;
 
 	void InitCustomDialog();
+	void InitEditValue();
 
 	// 생성된 메시지 맵 함수
 	virtual BOOL OnInitDialog();
 	afx_msg void OnSysCommand(UINT nID, LPARAM lParam);
 	afx_msg void OnPaint();
 	afx_msg HCURSOR OnQueryDragIcon();
-	DECLARE_MESSAGE_MAP()
 	afx_msg LRESULT OnPop(WPARAM wParam, LPARAM lParam);
+	DECLARE_MESSAGE_MAP()
+
+private:
+	CListenSocket* server;
+	DrawingView* dwView;
+	
+	CEdit ServerPort;
+	CButton ServerRunButton;
+
+	CIPAddressCtrl ConnectIP;
+	CEdit ConnectPort;
+	CButton ConnectButton;
+
+	CListBox LogList;
+
+	void InitDrawingView();
+	void ServerRun();
+
+	// thread
+	CWinThread* log_thread;
+	CWinThread* client_thread;
+	CWinThread* server_thread;
+
+public:
+	afx_msg void OnBnClickedServerrun();
+
+	// thread function
+	static UINT OnLogThread(LPVOID param);
+	static UINT OnServerThread(LPVOID param);
+	afx_msg void OnClickedConnectbutton();
+protected:
+	afx_msg LRESULT OnSenddraw(WPARAM wParam, LPARAM lParam);
 };

@@ -46,6 +46,14 @@ public:
 
 	afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
 	afx_msg void OnMouseMove(UINT nFlags, CPoint point);
+	afx_msg LRESULT OnDrawpop(WPARAM wParam, LPARAM lParam);
+
+	static UINT threadDrawQeueuRunner(LPVOID param);
+
+	void ClientRun();
+
+private:
+	CWinThread* threadDrawQueue;
 };
 
 

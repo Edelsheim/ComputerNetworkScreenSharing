@@ -11,5 +11,7 @@
 #include "framework.h"
 
 #define WM_POP WM_APP + 1
+#define WM_DRAWPOP WM_APP + 2
+#define WM_SENDDRAW WM_APP + 3
 
 #endif //PCH_H

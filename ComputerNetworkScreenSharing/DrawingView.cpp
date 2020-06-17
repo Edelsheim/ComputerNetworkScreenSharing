@@ -5,6 +5,7 @@
 #include "ComputerNetworkScreenSharing.h"
 #include "DrawingView.h"
 
+#include "DrawingQueue.h"
 
 // DrawingView
 
@@ -13,11 +14,18 @@ IMPLEMENT_DYNCREATE(DrawingView, CFormView)
 DrawingView::DrawingView()
 	: CFormView(IDD_Draw)
 {
-
+	this->point.x = -1;
+	this->point.y = -1;
+	threadDrawQueue = nullptr;
 }
 
 DrawingView::~DrawingView()
 {
+	if (threadDrawQueue != nullptr)
+	{
+		CloseHandle(threadDrawQueue);
+		threadDrawQueue = nullptr;
+	}
 }
 
 void DrawingView::DoDataExchange(CDataExchange* pDX)
@@ -29,6 +37,7 @@ BEGIN_MESSAGE_MAP(DrawingView, CFormView)
 	ON_WM_CTLCOLOR()
 	ON_WM_LBUTTONDOWN()
 	ON_WM_MOUSEMOVE()
+	ON_MESSAGE(WM_DRAWPOP, &DrawingView::OnDrawpop)
 END_MESSAGE_MAP()
 
 
@@ -65,8 +74,8 @@ void DrawingView::OnInitialUpdate()
 	CFormView::OnInitialUpdate();
 
 	// TODO: 여기에 특수화된 코드를 추가 및/또는 기본 클래스를 호출합니다.
-	this->point.x = 0;
-	this->point.y = 0;
+	this->point.x = -1;
+	this->point.y = -1;
 }
 
 HBRUSH DrawingView::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
@@ -97,7 +106,9 @@ void DrawingView::OnMouseMove(UINT nFlags, CPoint point)
 	{
 		RECT my_rect;
 		GetClientRect(&my_rect);
-		
+
+		DrawingQueue::GetQueue()->Push(point);
+
 		if (point.x <= my_rect.left + 3)
 		{
 			dc.MoveTo(my_rect.left, point.y);
@@ -133,7 +144,76 @@ void DrawingView::OnMouseMove(UINT nFlags, CPoint point)
 			this->point.x = point.x;
 			this->point.y = point.y;
 		}
-
 	}
 	CFormView::OnMouseMove(nFlags, point);
+}
+
+
+afx_msg LRESULT DrawingView::OnDrawpop(WPARAM wParam, LPARAM lParam)
+{
+	CPoint point = DrawingQueue::GetQueue()->Pop();
+
+	CClientDC dc(this);
+
+	RECT my_rect;
+	GetClientRect(&my_rect);
+
+	if (this->point.x == -1)
+		this->point.x = point.x;
+	if (this->point.y == -1)
+		this->point.y = point.y;
+
+	if (point.x <= my_rect.left + 3)
+	{
+		dc.MoveTo(my_rect.left, point.y);
+		dc.LineTo(point.x, point.y);
+		this->point.x = point.x;
+		this->point.y = point.y;
+	}
+	else if (point.x >= my_rect.right - 3)
+	{
+		dc.MoveTo(my_rect.right, point.y);
+		dc.LineTo(point.x, point.y);
+		this->point.x = point.x;
+		this->point.y = point.y;
+	}
+	else if (point.y <= my_rect.top + 3)
+	{
+		dc.MoveTo(point.x, my_rect.top);
+		dc.LineTo(point.x, point.y);
+		this->point.x = point.x;
+		this->point.y = point.y;
+	}
+	else if (point.y >= my_rect.bottom - 3)
+	{
+		dc.MoveTo(point.x, my_rect.bottom);
+		dc.LineTo(point.x, point.y);
+		this->point.x = point.x;
+		this->point.y = point.y;
+	}
+	else
+	{
+		dc.MoveTo(this->point.x, this->point.y);
+		dc.LineTo(point.x, point.y);
+		this->point.x = point.x;
+		this->point.y = point.y;
+	}
+	return 0;
+}
+
+UINT DrawingView::threadDrawQeueuRunner(LPVOID param)
+{
+	DrawingView* thisView = (DrawingView*)param;
+
+	while (1)
+	{
+		PostMessageA(thisView->m_hWnd, WM_DRAWPOP, NULL, NULL);
+		Sleep(10);
+	}
+	return 0;
+}
+
+void DrawingView::ClientRun()
+{
+	threadDrawQueue = AfxBeginThread(threadDrawQeueuRunner, this);
 }

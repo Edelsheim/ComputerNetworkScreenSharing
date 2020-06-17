@@ -29,8 +29,8 @@ void CListenSocket::OnAccept(int nErrorCode)
 	}
 	else
 	{
+		MessageQueue::GetInstance()->Push(L"Accept new client");
 		client->SetListenSocket(this); // set client's follw this socket
-
 		clientSocketList.AddTail(client); // add to client list
 		CAsyncSocket::OnAccept(nErrorCode);
 	}

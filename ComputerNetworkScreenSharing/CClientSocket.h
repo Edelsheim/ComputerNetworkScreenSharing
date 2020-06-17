@@ -1,15 +1,12 @@
 #pragma once
 #include <afxsock.h>
-class CClient :
+class CClientSocket :
 	public CSocket
 {
-private:
-	CAsyncSocket* serverSocket;
-
 public:
-	CClient();
-	~CClient();
-	void SetListenSocket(CAsyncSocket* socket);
+	CClientSocket();
+	~CClientSocket();
+	virtual void OnConnect(int nErrorCode);
 	virtual void OnClose(int nErrorCode);
 	virtual void OnReceive(int nErrorCode);
 	virtual void OnSend(int nErrorCode);
