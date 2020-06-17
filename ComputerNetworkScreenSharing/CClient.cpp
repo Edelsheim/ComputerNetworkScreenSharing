@@ -34,7 +34,15 @@ void CClient::OnReceive(int nErrorCode)
 	GetPeerName(peerIP, peerPort);
 
 	// receive
+	char point_buff[10];
+	ZeroMemory(point_buff, 10);
 
+	int len = 0;
+	if ((len = Receive(point_buff, 10)) > 0)
+	{
+		CListenSocket* serverSocket = (CListenSocket*)this->serverSocket;
+		serverSocket->BroadCast(point_buff, len);
+	}
 	//
 	CSocket::OnReceive(nErrorCode);
 }

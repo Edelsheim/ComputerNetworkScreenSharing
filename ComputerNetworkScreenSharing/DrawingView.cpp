@@ -84,7 +84,6 @@ void DrawingView::OnLButtonDown(UINT nFlags, CPoint point)
 	dc.MoveTo(point.x, point.y);
 	this->point.x = point.x;
 	this->point.y = point.y;
-
 	CFormView::OnLButtonDown(nFlags, point);
 }
 
