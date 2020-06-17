@@ -12,7 +12,6 @@
 #define new DEBUG_NEW
 #endif
 
-
 #include "MessageQueue.h"
 
 // 응용 프로그램 정보에 사용되는 CAboutDlg 대화 상자입니다.
@@ -53,7 +52,7 @@ END_MESSAGE_MAP()
 
 
 CComputerNetworkScreenSharingDlg::CComputerNetworkScreenSharingDlg(CWnd* pParent /*=nullptr*/)
-	: CDialogEx(IDD_COMPUTERNETWORKSCREENSHARING_DIALOG, pParent)
+	: CDialogEx(IDD_Main_DIALOG, pParent)
 {
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
 }
@@ -68,10 +67,33 @@ BEGIN_MESSAGE_MAP(CComputerNetworkScreenSharingDlg, CDialogEx)
 	ON_WM_PAINT()
 	ON_WM_QUERYDRAGICON()
 	ON_MESSAGE(WM_POP, &CComputerNetworkScreenSharingDlg::OnPop)
+	ON_WM_LBUTTONDOWN()
+	ON_WM_MOUSEMOVE()
 END_MESSAGE_MAP()
 
 
 // CComputerNetworkScreenSharingDlg 메시지 처리기
+#include "DrawingView.h"
+void CComputerNetworkScreenSharingDlg::InitCustomDialog()
+{
+	CCreateContext context;
+	ZeroMemory(&context, sizeof(context));
+
+	// get picture control size
+	CRect pic_con_rect;
+	GetDlgItem(IDC_PicCon)->GetWindowRect(&pic_con_rect);
+	ScreenToClient(&pic_con_rect);
+
+	//drawing view create
+	DrawingView *dwView = new DrawingView();
+	dwView->Create(NULL, NULL, WS_CHILDWINDOW, pic_con_rect, this, IDD_Draw, &context);
+	dwView->OnInitialUpdate();
+	dwView->ShowWindow(SW_SHOW);
+
+	// remove picture control
+	GetDlgItem(IDC_PicCon)->DestroyWindow();
+}
+
 
 BOOL CComputerNetworkScreenSharingDlg::OnInitDialog()
 {
@@ -103,6 +125,8 @@ BOOL CComputerNetworkScreenSharingDlg::OnInitDialog()
 	SetIcon(m_hIcon, FALSE);		// 작은 아이콘을 설정합니다.
 
 	// TODO: 여기에 추가 초기화 작업을 추가합니다.
+
+	InitCustomDialog();
 
 	return TRUE;  // 포커스를 컨트롤에 설정하지 않으면 TRUE를 반환합니다.
 }

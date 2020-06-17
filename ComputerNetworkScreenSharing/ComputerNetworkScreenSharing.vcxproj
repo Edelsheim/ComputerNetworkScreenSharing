@@ -187,6 +187,7 @@
     <ClInclude Include="CListenSocket.h" />
     <ClInclude Include="ComputerNetworkScreenSharing.h" />
     <ClInclude Include="ComputerNetworkScreenSharingDlg.h" />
+    <ClInclude Include="DrawingView.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="MessageQueue.h" />
     <ClInclude Include="pch.h" />
@@ -198,6 +199,7 @@
     <ClCompile Include="CListenSocket.cpp" />
     <ClCompile Include="ComputerNetworkScreenSharing.cpp" />
     <ClCompile Include="ComputerNetworkScreenSharingDlg.cpp" />
+    <ClCompile Include="DrawingView.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
