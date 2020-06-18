@@ -41,19 +41,25 @@ public:
 	// call protected's CFormView methods
 	virtual BOOL Create(LPCTSTR lpszClassName, LPCTSTR lpszWindowName, DWORD dwStyle, const RECT& rect, CWnd* pParentWnd, UINT nID, CCreateContext* pContext = NULL);
 	virtual void OnInitialUpdate(); // init update
+	virtual BOOL DestroyWindow();
 
 	afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor); // change background color
 
+	// control button
 	afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
 	afx_msg void OnMouseMove(UINT nFlags, CPoint point);
+
+	// message call
 	afx_msg LRESULT OnDrawpop(WPARAM wParam, LPARAM lParam);
 
-	static UINT threadDrawQeueuRunner(LPVOID param);
+	// thread runner
+	static UINT threadReceiveQeueuRunner(LPVOID param);
 
+	// view thread runner call
 	void ClientRun();
 
 private:
-	CWinThread* threadDrawQueue;
+	CWinThread* threadReceiveQueue;
 };
 
 

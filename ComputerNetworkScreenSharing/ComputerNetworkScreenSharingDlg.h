@@ -32,6 +32,8 @@ protected:
 
 	// 생성된 메시지 맵 함수
 	virtual BOOL OnInitDialog();
+	virtual BOOL DestroyWindow();
+
 	afx_msg void OnSysCommand(UINT nID, LPARAM lParam);
 	afx_msg void OnPaint();
 	afx_msg HCURSOR OnQueryDragIcon();
@@ -61,11 +63,11 @@ private:
 
 public:
 	afx_msg void OnBnClickedServerrun();
+	afx_msg void OnClickedConnectbutton();
+	afx_msg LRESULT OnSenddraw(WPARAM wParam, LPARAM lParam);
 
 	// thread function
 	static UINT OnLogThread(LPVOID param);
 	static UINT OnServerThread(LPVOID param);
-	afx_msg void OnClickedConnectbutton();
-protected:
-	afx_msg LRESULT OnSenddraw(WPARAM wParam, LPARAM lParam);
+
 };
