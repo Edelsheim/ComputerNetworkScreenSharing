@@ -1,31 +1,42 @@
 #pragma once
 
-#include "pch.h"
 #include <concurrent_queue.h>
-
-#include <string>
-#include "MessageQueue.h"
+#include "PointData.h"
 
 class DrawingQueue
 {
 private:
-	Concurrency::concurrent_queue<CPoint> queue;
+	Concurrency::concurrent_queue<PointData> queue;
 public:
-	static DrawingQueue* GetQueue()
+	static DrawingQueue* GetReceiveQueue()
 	{
-		static DrawingQueue q;
-		return &q;
+		static DrawingQueue receiveQueue;
+		return &receiveQueue;
 	}
 
-	void Push(CPoint point)
+	static DrawingQueue* GetSendQueue()
+	{
+		static DrawingQueue sendQueue;
+		return &sendQueue;
+	}
+
+	void Push(PointData point)
 	{
 		queue.push(point);
-		MessageQueue::GetInstance()->Push(std::to_wstring(point.x) + L"," + std::to_wstring(point.y));
 	}
 
-	CPoint Pop()
+	void Push(CPoint point, char type)
 	{
-		CPoint point;
+		PointData point_data;
+		point_data.type = type;
+		point_data.x = point.x;
+		point_data.y = point.y;
+		Push(point_data);
+	}
+
+	PointData Pop()
+	{
+		PointData point;
 		bool check = queue.try_pop(point);
 		if (check)
 		{
