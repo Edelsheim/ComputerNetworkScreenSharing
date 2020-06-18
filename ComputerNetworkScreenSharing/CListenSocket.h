@@ -11,5 +11,6 @@ public:
 	void OnAccept(int nErrorCode);
 	void CloseClientSocket(CSocket* client);
 	void BroadCast(void* message, int len);
+	virtual void OnReceive(int nErrorCode);
 };
 

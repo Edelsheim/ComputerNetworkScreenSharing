@@ -82,3 +82,8 @@ void CListenSocket::BroadCast(void* message, int len)
 		}
 	}
 }
+
+void CListenSocket::OnReceive(int nErrorCode)
+{
+	CAsyncSocket::OnReceive(nErrorCode);
+}

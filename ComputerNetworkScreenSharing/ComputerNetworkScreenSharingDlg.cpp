@@ -154,6 +154,7 @@ BOOL CComputerNetworkScreenSharingDlg::OnInitDialog()
 	InitEditValue();
 
 	log_thread = AfxBeginThread(OnLogThread, this);
+	server_thread = AfxBeginThread(OnServerThread, this);
 
 	return TRUE;  // 포커스를 컨트롤에 설정하지 않으면 TRUE를 반환합니다.
 }
@@ -250,7 +251,6 @@ void CComputerNetworkScreenSharingDlg::ServerRun()
 		if (server->Listen(5))
 		{
 			// success log
-			server_thread = AfxBeginThread(OnServerThread, this);
 			MessageQueue::GetInstance()->Push(L"Socket Server Open");
 			ServerRunButton.SetWindowTextW(_T("Server Close"));
 			ServerRunButton.EnableWindow(TRUE);
@@ -325,10 +325,8 @@ void CComputerNetworkScreenSharingDlg::OnClickedConnectbutton()
 	BOOL check = client->Connect(ip, _ttoi(port));
 	if (check)
 	{
-		if (dwView != nullptr)
-			dwView->ClientRun();
-
-;		str.append(L" connected");
+		str.append(L" connected");
+		dwView->isClient = true;
 		MessageQueue::GetInstance()->Push(str);
 	}
 	else
@@ -384,8 +382,15 @@ afx_msg LRESULT CComputerNetworkScreenSharingDlg::OnSenddraw(WPARAM wParam, LPAR
 		message[i] = message_str.c_str()[i];
 	}
 
-	server->BroadCast(message, DATA_SIZE);
+	if (server != nullptr)
+	{
+		server->BroadCast(message, DATA_SIZE);
+	}
 
+	if (dwView->isClient)
+	{
+		client->Send(message, DATA_SIZE);
+	}
 	return 0;
 }
 
