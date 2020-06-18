@@ -65,8 +65,14 @@ void CListenSocket::CloseClientSocket(CSocket* client)
 	delete client;
 }
 
+#include <string>
 void CListenSocket::BroadCast(void* message, int len)
 {
+	if (clientSocketList.GetCount() == 0)
+	{
+		return;
+	}
+
 	POSITION pos;
 	pos = clientSocketList.GetHeadPosition();
 	CClient* client = nullptr;
@@ -76,7 +82,7 @@ void CListenSocket::BroadCast(void* message, int len)
 		client = (CClient*)clientSocketList.GetNext(pos);
 		if (client != nullptr)
 		{
-			client->Send(message, len * 2);
+			client->Send(message, len);
 		}
 	}
 }
