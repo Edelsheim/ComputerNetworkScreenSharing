@@ -5,6 +5,7 @@
 #include "ComputerNetworkScreenSharing.h"
 #include "DrawingView.h"
 
+#include "MessageQueue.h"
 #include "DrawingQueue.h"
 
 // DrawingView
@@ -16,16 +17,12 @@ DrawingView::DrawingView()
 {
 	this->point.x = -1;
 	this->point.y = -1;
-	threadDrawQueue = nullptr;
+	threadReceiveQueue = nullptr;
 }
 
 DrawingView::~DrawingView()
 {
-	if (threadDrawQueue != nullptr)
-	{
-		CloseHandle(threadDrawQueue);
-		threadDrawQueue = nullptr;
-	}
+
 }
 
 void DrawingView::DoDataExchange(CDataExchange* pDX)
@@ -73,9 +70,19 @@ void DrawingView::OnInitialUpdate()
 {
 	CFormView::OnInitialUpdate();
 
-	// TODO: 여기에 특수화된 코드를 추가 및/또는 기본 클래스를 호출합니다.
 	this->point.x = -1;
 	this->point.y = -1;
+}
+
+BOOL DrawingView::DestroyWindow()
+{
+	if (threadReceiveQueue != nullptr)
+	{
+		threadReceiveQueue->ExitInstance();
+		threadReceiveQueue = nullptr;
+	}
+
+	return CFormView::DestroyWindow();
 }
 
 HBRUSH DrawingView::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
@@ -93,9 +100,12 @@ void DrawingView::OnLButtonDown(UINT nFlags, CPoint point)
 	dc.MoveTo(point.x, point.y);
 	this->point.x = point.x;
 	this->point.y = point.y;
+
+	// push to type is 'click'
+	DrawingQueue::GetSendQueue()->Push(point, 'c');
+	
 	CFormView::OnLButtonDown(nFlags, point);
 }
-
 
 void DrawingView::OnMouseMove(UINT nFlags, CPoint point)
 {
@@ -107,8 +117,8 @@ void DrawingView::OnMouseMove(UINT nFlags, CPoint point)
 		RECT my_rect;
 		GetClientRect(&my_rect);
 
-		DrawingQueue::GetQueue()->Push(point);
-
+		// push to type is 'move'
+		DrawingQueue::GetSendQueue()->Push(point, 'm');
 		if (point.x <= my_rect.left + 3)
 		{
 			dc.MoveTo(my_rect.left, point.y);
@@ -148,22 +158,31 @@ void DrawingView::OnMouseMove(UINT nFlags, CPoint point)
 	CFormView::OnMouseMove(nFlags, point);
 }
 
-
 afx_msg LRESULT DrawingView::OnDrawpop(WPARAM wParam, LPARAM lParam)
 {
-	CPoint point = DrawingQueue::GetQueue()->Pop();
+	PointData point = DrawingQueue::GetReceiveQueue()->Pop();
+	if (point.x <= -1 || point.y <= -1)
+		return 1;
 
 	CClientDC dc(this);
 
+	// get this view rect
 	RECT my_rect;
 	GetClientRect(&my_rect);
 
+	// check this is first
 	if (this->point.x == -1)
 		this->point.x = point.x;
 	if (this->point.y == -1)
 		this->point.y = point.y;
 
-	if (point.x <= my_rect.left + 3)
+	if (point.type == 'c') // check type is 'click'
+	{
+		dc.MoveTo(point.x, point.y);
+		this->point.x = point.x;
+		this->point.y = point.y;
+	}
+	else if (point.x <= my_rect.left + 3)
 	{
 		dc.MoveTo(my_rect.left, point.y);
 		dc.LineTo(point.x, point.y);
@@ -201,19 +220,20 @@ afx_msg LRESULT DrawingView::OnDrawpop(WPARAM wParam, LPARAM lParam)
 	return 0;
 }
 
-UINT DrawingView::threadDrawQeueuRunner(LPVOID param)
+UINT DrawingView::threadReceiveQeueuRunner(LPVOID param)
 {
 	DrawingView* thisView = (DrawingView*)param;
-
+	MessageQueue::GetInstance()->Push(L"Thread Receive Qeueu Runner");
 	while (1)
 	{
 		PostMessageA(thisView->m_hWnd, WM_DRAWPOP, NULL, NULL);
-		Sleep(10);
+		Sleep(1);
 	}
 	return 0;
 }
 
 void DrawingView::ClientRun()
 {
-	threadDrawQueue = AfxBeginThread(threadDrawQeueuRunner, this);
+	threadReceiveQueue = AfxBeginThread(threadReceiveQeueuRunner, this);
+	MessageQueue::GetInstance()->Push(L"Drawing View Client Run");
 }
