@@ -12,6 +12,10 @@
 #define new DEBUG_NEW
 #endif
 
+#include "MessageQueue.h"
+#include "DrawingQueue.h"
+#include "CListenSocket.h"
+#include "CClientSocket.h"
 
 // 응용 프로그램 정보에 사용되는 CAboutDlg 대화 상자입니다.
 
@@ -51,24 +55,66 @@ END_MESSAGE_MAP()
 
 
 CComputerNetworkScreenSharingDlg::CComputerNetworkScreenSharingDlg(CWnd* pParent /*=nullptr*/)
-	: CDialogEx(IDD_COMPUTERNETWORKSCREENSHARING_DIALOG, pParent)
+	: CDialogEx(IDD_Main_DIALOG, pParent)
 {
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
+	log_thread = nullptr;
+	server = nullptr;
+	client = nullptr;
+	dwView = nullptr;
+	client_thread = nullptr;
+	server_thread = nullptr;
 }
 
 void CComputerNetworkScreenSharingDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CDialogEx::DoDataExchange(pDX);
+	DDX_Control(pDX, IDC_ServerPort, ServerPort);
+	DDX_Control(pDX, IDC_ConnectIP, ConnectIP);
+	DDX_Control(pDX, IDC_ConnectPort, ConnectPort);
+	DDX_Control(pDX, IDC_ConnectButton, ConnectButton);
+	DDX_Control(pDX, IDC_ServerRunButton, ServerRunButton);
+	DDX_Control(pDX, IDC_LogList, LogList);
 }
 
 BEGIN_MESSAGE_MAP(CComputerNetworkScreenSharingDlg, CDialogEx)
 	ON_WM_SYSCOMMAND()
 	ON_WM_PAINT()
 	ON_WM_QUERYDRAGICON()
+	ON_MESSAGE(WM_POP, &CComputerNetworkScreenSharingDlg::OnPop)
+	ON_WM_LBUTTONDOWN()
+	ON_WM_MOUSEMOVE()
+	ON_BN_CLICKED(IDC_ServerRunButton, &CComputerNetworkScreenSharingDlg::OnBnClickedServerrun)
+	ON_BN_CLICKED(IDC_ConnectButton, &CComputerNetworkScreenSharingDlg::OnClickedConnectbutton)
+	ON_MESSAGE(WM_SENDDRAW, &CComputerNetworkScreenSharingDlg::OnSenddraw)
 END_MESSAGE_MAP()
 
 
 // CComputerNetworkScreenSharingDlg 메시지 처리기
+
+void CComputerNetworkScreenSharingDlg::InitCustomDialog()
+{
+	InitDrawingView();
+}
+
+void CComputerNetworkScreenSharingDlg::InitEditValue()
+{
+	CString defaultServerPortStr;
+	BOOL check = defaultServerPortStr.LoadStringW(IDS_DefaultServerPort);
+	ASSERT(check);
+	ServerPort.SetWindowTextW(defaultServerPortStr);
+
+	CString defaultConnectIPStr;
+	check = defaultConnectIPStr.LoadStringW(IDS_DefaultConnectIP);
+	ASSERT(check);
+	ConnectIP.SetWindowTextW(defaultConnectIPStr);
+
+	CString defaultConnectPortStr;
+	check = defaultConnectPortStr.LoadStringW(IDS_DefaultConnectPort);
+	ASSERT(check);
+	ConnectPort.SetWindowTextW(defaultConnectPortStr);
+}
+
 
 BOOL CComputerNetworkScreenSharingDlg::OnInitDialog()
 {
@@ -100,6 +146,14 @@ BOOL CComputerNetworkScreenSharingDlg::OnInitDialog()
 	SetIcon(m_hIcon, FALSE);		// 작은 아이콘을 설정합니다.
 
 	// TODO: 여기에 추가 초기화 작업을 추가합니다.
+
+	// init Socket
+	AfxSocketInit();
+
+	InitCustomDialog();
+	InitEditValue();
+
+	log_thread = AfxBeginThread(OnLogThread, this);
 
 	return TRUE;  // 포커스를 컨트롤에 설정하지 않으면 TRUE를 반환합니다.
 }
@@ -153,3 +207,225 @@ HCURSOR CComputerNetworkScreenSharingDlg::OnQueryDragIcon()
 	return static_cast<HCURSOR>(m_hIcon);
 }
 
+afx_msg LRESULT CComputerNetworkScreenSharingDlg::OnPop(WPARAM wParam, LPARAM lParam)
+{
+	std::wstring message_wstr = MessageQueue::GetInstance()->Pop();
+	
+	if (!message_wstr.empty())
+		LogList.InsertString(0, message_wstr.c_str());
+
+	return 0;
+}
+
+void CComputerNetworkScreenSharingDlg::InitDrawingView()
+{
+	CCreateContext context;
+	ZeroMemory(&context, sizeof(context));
+
+	// get picture control size
+	CRect pic_con_rect;
+	GetDlgItem(IDC_PicCon)->GetWindowRect(&pic_con_rect);
+	ScreenToClient(&pic_con_rect);
+
+	//drawing view create
+	dwView = new DrawingView();
+	dwView->Create(NULL, NULL, WS_CHILDWINDOW, pic_con_rect, this, IDD_Draw, &context);
+	dwView->OnInitialUpdate();
+	dwView->ShowWindow(SW_SHOW);
+
+	// remove picture control
+	GetDlgItem(IDC_PicCon)->DestroyWindow();
+}
+
+void CComputerNetworkScreenSharingDlg::ServerRun()
+{
+	server = new CListenSocket;
+	CString portStr;
+	UINT port = 0;
+	ServerPort.GetWindowTextW(portStr);
+	port = _ttoi(portStr);
+
+	if (server->Create(port, SOCK_STREAM))
+	{
+		if (server->Listen(5))
+		{
+			// success log
+			server_thread = AfxBeginThread(OnServerThread, this);
+			MessageQueue::GetInstance()->Push(L"Socket Server Open");
+			ServerRunButton.SetWindowTextW(_T("Server Close"));
+			ServerRunButton.EnableWindow(TRUE);
+		}
+		else
+		{
+			// error log
+			int error_code = server->GetLastError();
+
+			server->Close();
+			delete server;
+			server = nullptr;
+
+			ServerRunButton.EnableWindow(TRUE);
+			MessageQueue::GetInstance()->Push(L"Error Code("+ std::to_wstring(error_code) + L")");
+		}
+	}
+	else
+	{
+		// error log
+		int error_code = server->GetLastError();
+
+		server->Close();
+		delete server;
+		server = nullptr;
+
+		ServerRunButton.EnableWindow(TRUE);
+		MessageQueue::GetInstance()->Push(L"Error Code(" + std::to_wstring(error_code) + L")");
+	}
+}
+
+void CComputerNetworkScreenSharingDlg::OnBnClickedServerrun()
+{
+	if (server != nullptr)
+	{
+		ServerRunButton.EnableWindow(FALSE);
+
+		MessageQueue::GetInstance()->Push(L"Socket Server Close");
+
+		server->Close();
+		delete server;
+		server = nullptr;
+
+		ServerRunButton.SetWindowTextW(_T("Server Run"));
+		ServerRunButton.EnableWindow(TRUE);
+	}
+	else
+	{
+		ServerRunButton.EnableWindow(FALSE);
+		ServerRun();
+	}
+}
+
+void CComputerNetworkScreenSharingDlg::OnClickedConnectbutton()
+{
+	client = new CClientSocket;
+	client->Create();
+	
+	BYTE a, b, c, d;
+	CString ip;
+	ConnectIP.GetAddress(a, b, c, d);
+	ip.Format(_T("%d.%d.%d.%d"), a, b, c, d);
+
+	CString port;
+	ConnectPort.GetWindowTextW(port);
+
+	std::wstring str = L"Server ";
+	str.append(ip);
+	str.append(L":");
+	str.append(port);
+
+	BOOL check = client->Connect(ip, _ttoi(port));
+	if (check)
+	{
+		if (dwView != nullptr)
+			dwView->ClientRun();
+
+;		str.append(L" connected");
+		MessageQueue::GetInstance()->Push(str);
+	}
+	else
+	{
+		str.append(L" fail");
+		MessageQueue::GetInstance()->Push(str);
+	}
+}
+
+UINT CComputerNetworkScreenSharingDlg::OnLogThread(LPVOID param)
+{
+	CComputerNetworkScreenSharingDlg* dlg = (CComputerNetworkScreenSharingDlg*)param;
+
+	while (1)
+	{
+		PostMessageA(dlg->m_hWnd, WM_POP, NULL, NULL);
+		Sleep(130);
+	}
+	return 0;
+}
+
+UINT CComputerNetworkScreenSharingDlg::OnServerThread(LPVOID param)
+{
+	CComputerNetworkScreenSharingDlg* dlg = (CComputerNetworkScreenSharingDlg*)param;
+
+	MessageQueue::GetInstance()->Push(L"Server Thread run");
+	while (1)
+	{
+		PostMessageA(dlg->m_hWnd, WM_SENDDRAW, NULL, NULL);
+		Sleep(1);
+	}
+	return 0;
+}
+
+afx_msg LRESULT CComputerNetworkScreenSharingDlg::OnSenddraw(WPARAM wParam, LPARAM lParam)
+{
+	PointData point = DrawingQueue::GetSendQueue()->Pop();
+	if (point.x == -1 || point.y == -1)
+	{
+		return 1;
+	}
+	
+	std::string message_str = point.ToString();
+	char message[DATA_SIZE] = { 0, };
+	int i = 0;
+	for (i = 0; i != DATA_SIZE; i++)
+	{
+		if (message_str.c_str()[i] == '\0')
+		{
+			message[i] = '\0';
+			break;
+		}
+		message[i] = message_str.c_str()[i];
+	}
+
+	server->BroadCast(message, DATA_SIZE);
+
+	return 0;
+}
+
+
+BOOL CComputerNetworkScreenSharingDlg::DestroyWindow()
+{
+	// TODO: 여기에 특수화된 코드를 추가 및/또는 기본 클래스를 호출합니다.
+
+	if (log_thread != nullptr)
+	{
+		log_thread->ExitInstance();
+		log_thread = nullptr;
+	}
+	if (server != nullptr)
+	{
+		server->Close();
+		delete server;
+		server = nullptr;
+	}
+	if (client != nullptr)
+	{
+		client->Close();
+		delete client;
+		client = nullptr;
+	}
+	if (dwView != nullptr)
+	{
+		dwView->DestroyWindow();
+		// delete dwView;
+		dwView = nullptr;
+	}
+	if (client_thread != nullptr)
+	{
+		client_thread->ExitInstance();
+		client_thread = nullptr;
+	}
+	if (server_thread != nullptr)
+	{
+		server_thread->ExitInstance();
+		server_thread = nullptr;
+	}
+	return CDialogEx::DestroyWindow();
+}

@@ -10,4 +10,10 @@
 // 여기에 미리 컴파일하려는 헤더 추가
 #include "framework.h"
 
+#define WM_POP WM_APP + 1
+#define WM_DRAWPOP WM_APP + 2
+#define WM_SENDDRAW WM_APP + 3
+
+#define DATA_SIZE 12
+
 #endif //PCH_H

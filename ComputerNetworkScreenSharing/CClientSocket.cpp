@@ -1,0 +1,70 @@
+#include "pch.h"
+#include "CClientSocket.h"
+
+#include "DrawingQueue.h"
+#include "MessageQueue.h"
+#include <string>
+
+CClientSocket::CClientSocket() : CSocket()
+{
+}
+
+CClientSocket::~CClientSocket()
+{
+}
+
+void CClientSocket::OnConnect(int nErrorCode)
+{
+	MessageQueue::GetInstance()->Push(std::to_wstring(nErrorCode));
+	CSocket::OnConnect(nErrorCode);
+}
+
+
+void CClientSocket::OnClose(int nErrorCode)
+{
+	ShutDown();
+	Close();
+	CSocket::OnClose(nErrorCode);
+}
+
+
+void CClientSocket::OnReceive(int nErrorCode)
+{
+	CString peerIP = _T("");
+	UINT peerPort = 0;
+
+	GetPeerName(peerIP, peerPort);
+
+	char data[DATA_SIZE] = { 0, };
+	int len = 0;
+
+	if ((len = Receive(data, sizeof(char) * DATA_SIZE)) > 0)
+	{
+		char type = data[0];
+		char x = data[1];
+		LONG point_x = (data[2] - '0') * 1000;
+		point_x += (data[3] - '0') * 100;
+		point_x += (data[4] - '0') * 10;
+		point_x += data[5] - '0';
+
+		char y = data[6];
+		LONG point_y = (data[7] - '0') * 1000;
+		point_y += (data[8] - '0') * 100;
+		point_y += (data[9] - '0') * 10;
+		point_y += data[10] - '0';
+
+		PointData point_data;
+		point_data.type = type;
+		point_data.x = point_x;
+		point_data.y = point_y;
+
+		DrawingQueue::GetReceiveQueue()->Push(point_data);
+	}
+	CSocket::OnReceive(nErrorCode);
+}
+
+
+void CClientSocket::OnSend(int nErrorCode)
+{
+	CSocket::OnSend(nErrorCode);
+}
