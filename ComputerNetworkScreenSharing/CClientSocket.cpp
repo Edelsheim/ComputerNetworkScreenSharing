@@ -11,7 +11,6 @@
 
 CClientSocket::CClientSocket() : CSocket()
 {
-	AfxSocketInit();
 }
 
 CClientSocket::~CClientSocket()

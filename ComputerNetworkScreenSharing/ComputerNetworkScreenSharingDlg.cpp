@@ -143,6 +143,9 @@ BOOL CComputerNetworkScreenSharingDlg::OnInitDialog()
 
 	// TODO: 여기에 추가 초기화 작업을 추가합니다.
 
+	// init Socket
+	AfxSocketInit();
+
 	InitCustomDialog();
 	InitEditValue();
 

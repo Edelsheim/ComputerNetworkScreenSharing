@@ -9,11 +9,24 @@
 
 CListenSocket::CListenSocket() : CAsyncSocket()
 {
-	AfxSocketInit();
+
 }
 
 CListenSocket::~CListenSocket()
 {
+	POSITION pos;
+	pos = clientSocketList.GetHeadPosition();
+	CClient* client = nullptr;
+
+	while (pos != NULL)
+	{
+		client = (CClient*)clientSocketList.GetNext(pos);
+		if (client != nullptr)
+		{
+			client->Close();
+		}
+	}
+	clientSocketList.RemoveAll();
 }
 
 void CListenSocket::OnAccept(int nErrorCode)
