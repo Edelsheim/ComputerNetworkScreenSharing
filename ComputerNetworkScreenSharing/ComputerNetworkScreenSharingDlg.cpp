@@ -345,7 +345,7 @@ UINT CComputerNetworkScreenSharingDlg::OnLogThread(LPVOID param)
 	while (1)
 	{
 		PostMessageA(dlg->m_hWnd, WM_POP, NULL, NULL);
-		Sleep(200);
+		Sleep(130);
 	}
 	return 0;
 }
@@ -357,8 +357,8 @@ UINT CComputerNetworkScreenSharingDlg::OnServerThread(LPVOID param)
 	MessageQueue::GetInstance()->Push(L"Server Thread run");
 	while (1)
 	{
-		Sleep(10);
 		PostMessageA(dlg->m_hWnd, WM_SENDDRAW, NULL, NULL);
+		Sleep(1);
 	}
 	return 0;
 }
