@@ -13,6 +13,7 @@
 #endif
 
 #include "MessageQueue.h"
+#include "DrawingQueue.h"
 #include "CListenSocket.h"
 #include "CClientSocket.h"
 
@@ -59,7 +60,10 @@ CComputerNetworkScreenSharingDlg::CComputerNetworkScreenSharingDlg(CWnd* pParent
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
 	log_thread = nullptr;
 	server = nullptr;
+	client = nullptr;
 	dwView = nullptr;
+	client_thread = nullptr;
+	server_thread = nullptr;
 }
 
 void CComputerNetworkScreenSharingDlg::DoDataExchange(CDataExchange* pDX)
@@ -160,27 +164,6 @@ void CComputerNetworkScreenSharingDlg::OnSysCommand(UINT nID, LPARAM lParam)
 	{
 		CAboutDlg dlgAbout;
 		dlgAbout.DoModal();
-	}
-	else if (nID == SC_CLOSE)
-	{
-		if (log_thread != nullptr)
-		{
-			CloseHandle(log_thread);
-			log_thread = nullptr;
-		}
-		if (server != nullptr)
-		{
-			server->Close();
-			delete server;
-			server = nullptr;
-		}
-		if (dwView != nullptr)
-		{
-			dwView->DestroyWindow();
-			delete dwView;
-			dwView = nullptr;
-		}
-		CDialogEx::OnSysCommand(nID, lParam);
 	}
 	else
 	{
@@ -323,8 +306,8 @@ void CComputerNetworkScreenSharingDlg::OnBnClickedServerrun()
 
 void CComputerNetworkScreenSharingDlg::OnClickedConnectbutton()
 {
-	CClientSocket client;
-	client.Create();
+	client = new CClientSocket;
+	client->Create();
 	
 	BYTE a, b, c, d;
 	CString ip;
@@ -339,11 +322,13 @@ void CComputerNetworkScreenSharingDlg::OnClickedConnectbutton()
 	str.append(L":");
 	str.append(port);
 
-	BOOL check = client.Connect(ip, _ttoi(port));
+	BOOL check = client->Connect(ip, _ttoi(port));
 	if (check)
 	{
-		dwView->ClientRun();
-		str.append(L" connected");
+		if (dwView != nullptr)
+			dwView->ClientRun();
+
+;		str.append(L" connected");
 		MessageQueue::GetInstance()->Push(str);
 	}
 	else
@@ -369,21 +354,78 @@ UINT CComputerNetworkScreenSharingDlg::OnServerThread(LPVOID param)
 {
 	CComputerNetworkScreenSharingDlg* dlg = (CComputerNetworkScreenSharingDlg*)param;
 
+	MessageQueue::GetInstance()->Push(L"Server Thread run");
 	while (1)
 	{
-		PostMessageA(dlg->m_hWnd, WM_DRAWPOP, NULL, NULL);
 		Sleep(10);
+		PostMessageA(dlg->m_hWnd, WM_SENDDRAW, NULL, NULL);
 	}
 	return 0;
 }
 
-#include "DrawingQueue.h"
 afx_msg LRESULT CComputerNetworkScreenSharingDlg::OnSenddraw(WPARAM wParam, LPARAM lParam)
 {
-	CPoint point = DrawingQueue::GetQueue()->Pop();
-	if (point.x != -1)
+	PointData point = DrawingQueue::GetSendQueue()->Pop();
+	if (point.x == -1 || point.y == -1)
 	{
-		server->BroadCast(&point, sizeof(CPoint));
+		return 1;
 	}
+	
+	std::string message_str = point.ToString();
+	char message[DATA_SIZE] = { 0, };
+	int i = 0;
+	for (i = 0; i != DATA_SIZE; i++)
+	{
+		if (message_str.c_str()[i] == '\0')
+		{
+			message[i] = '\0';
+			break;
+		}
+		message[i] = message_str.c_str()[i];
+	}
+
+	server->BroadCast(message, DATA_SIZE);
+
 	return 0;
+}
+
+
+BOOL CComputerNetworkScreenSharingDlg::DestroyWindow()
+{
+	// TODO: 여기에 특수화된 코드를 추가 및/또는 기본 클래스를 호출합니다.
+
+	if (log_thread != nullptr)
+	{
+		log_thread->ExitInstance();
+		log_thread = nullptr;
+	}
+	if (server != nullptr)
+	{
+		server->Close();
+		delete server;
+		server = nullptr;
+	}
+	if (client != nullptr)
+	{
+		client->Close();
+		delete client;
+		client = nullptr;
+	}
+	if (dwView != nullptr)
+	{
+		dwView->DestroyWindow();
+		// delete dwView;
+		dwView = nullptr;
+	}
+	if (client_thread != nullptr)
+	{
+		client_thread->ExitInstance();
+		client_thread = nullptr;
+	}
+	if (server_thread != nullptr)
+	{
+		server_thread->ExitInstance();
+		server_thread = nullptr;
+	}
+	return CDialogEx::DestroyWindow();
 }

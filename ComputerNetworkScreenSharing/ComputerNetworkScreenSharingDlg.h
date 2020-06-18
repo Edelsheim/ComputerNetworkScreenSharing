@@ -5,6 +5,7 @@
 #pragma once
 
 #include "CListenSocket.h"
+#include "CClientSocket.h"
 #include "DrawingView.h"
 
 // CComputerNetworkScreenSharingDlg 대화 상자
@@ -42,6 +43,8 @@ protected:
 
 private:
 	CListenSocket* server;
+	CClientSocket* client;
+
 	DrawingView* dwView;
 	
 	CEdit ServerPort;
