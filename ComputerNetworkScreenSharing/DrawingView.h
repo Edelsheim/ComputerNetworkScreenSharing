@@ -8,6 +8,7 @@ class DrawingView : public CFormView
 
 private:
 	CPoint point; // draw point
+	CPoint receivePoint;
 
 public:
 #ifdef AFX_DESIGN_TIME
@@ -27,6 +28,8 @@ protected:
 public:
 	DrawingView();
 	virtual ~DrawingView();
+
+	bool isClient;
 
 	// call protected's CFormView methods
 	virtual BOOL Create(LPCTSTR lpszClassName, LPCTSTR lpszWindowName, DWORD dwStyle, const RECT& rect, CWnd* pParentWnd, UINT nID, CCreateContext* pContext = NULL);
