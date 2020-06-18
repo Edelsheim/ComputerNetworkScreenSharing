@@ -11,7 +11,9 @@ Framework : C++ MFC (v142)
 
 Computer Network 및 C++ MFC 공부겸 화면공유 프로젝트
 
+```
 현재 오직 Server -> Client으로 일방향 데이터 전송만 구현
+```
 
 #  소스코드 설명
 ## inline code
@@ -68,12 +70,14 @@ reference:
 CClient
 ```
 CSocket를 상속받은 Client 클래스.
+
 ListenSocket에 Accept해온 Client를 저장.
 ```
 
 CListenSocket
 ```
 CAsyncSocket를 상속받은 Socket Server 클래스.
+
 OnAccept에서 감지된 Client를 저장.
 Client에게 데이터를 전송하기위한 BroadCast 기능.
 ```
@@ -81,7 +85,9 @@ Client에게 데이터를 전송하기위한 BroadCast 기능.
 CClientSocket
 ```
 CSocket를 상속받은 Socket Client 클래스.
-Socket Server에서 보내온 약속된 데이터를 받아 DrawingQueue::GetReceiveQueue()->Push 진행.
+
+Socket Server에서 보내온 약속된 데이터를 받아
+DrawingQueue::GetReceiveQueue()->Push 진행.
 ```
 
 ## view code
@@ -102,7 +108,9 @@ DrawingView
 ```
 CFormView를 상속받은 그림 그리는 도화지 View
 
-기본 역할은 마우스 좌클릭, 좌클릭중 움직이는 마우스 포인터를 따라 화면에 그림을 그려주는 view.
+기본 역할 :
+    마우스 좌클릭, 좌클릭중 움직이는 마우스 포인터를 따라 화면에 그림을 그려주는 view.
 
-Socket Client가 활성화 될 경우 DrawingQueue::GetReceiveQueue()->Pop()을 통해 Server가 전달해준 약속된 데이터를 기반으로 화면에 그려준다.
+Socket Client가 활성화 될 경우 DrawingQueue::GetReceiveQueue()->Pop()을 통해
+Server가 전달해준 약속된 데이터를 기반으로 화면에 그려준다.
 ```
