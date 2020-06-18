@@ -12,7 +12,7 @@ Framework : C++ MFC (v142)
 Computer Network 및 C++ MFC 공부겸 화면공유 프로젝트
 
 ```
-현재 오직 Server -> Client으로 일방향 데이터 전송만 구현
+현재 오직 Server/Client가 1:1로 양방향 데이터 전송 구현
 ```
 
 #  소스코드 설명
