@@ -14,4 +14,6 @@
 #define WM_DRAWPOP WM_APP + 2
 #define WM_SENDDRAW WM_APP + 3
 
+#define DATA_SIZE 12
+
 #endif //PCH_H
