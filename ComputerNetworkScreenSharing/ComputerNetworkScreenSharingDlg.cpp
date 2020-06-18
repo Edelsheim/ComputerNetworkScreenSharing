@@ -258,27 +258,27 @@ void CComputerNetworkScreenSharingDlg::ServerRun()
 		else
 		{
 			// error log
+			int error_code = server->GetLastError();
+
 			server->Close();
 			delete server;
 			server = nullptr;
 
 			ServerRunButton.EnableWindow(TRUE);
+			MessageQueue::GetInstance()->Push(L"Error Code("+ std::to_wstring(error_code) + L")");
 		}
 	}
 	else
 	{
 		// error log
-
-		int code = server->GetLastError();
-		CString code_str;
-		code_str.Format(_T("%d"), code);
-		MessageBox(code_str);
+		int error_code = server->GetLastError();
 
 		server->Close();
 		delete server;
 		server = nullptr;
 
 		ServerRunButton.EnableWindow(TRUE);
+		MessageQueue::GetInstance()->Push(L"Error Code(" + std::to_wstring(error_code) + L")");
 	}
 }
 

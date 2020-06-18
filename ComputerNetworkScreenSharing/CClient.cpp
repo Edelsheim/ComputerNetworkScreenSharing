@@ -2,11 +2,6 @@
 #include "CClient.h"
 #include "CListenSocket.h"
 
-
-
-//
-// https://afsdzvcx123.tistory.com/98
-//
 CClient::CClient()
 {
 	serverSocket = nullptr;

@@ -1,15 +1,5 @@
 ﻿#pragma once
 
-
-// dialog add to form view
-// https://luckygg.tistory.com/177
-
-// change background
-// http://egloos.zum.com/mindol/v/214184
-
-// drawing
-// https://blog.naver.com/rkttndk/221434286381
-
 // DrawingView 폼 보기
 
 class DrawingView : public CFormView
@@ -40,10 +30,11 @@ public:
 
 	// call protected's CFormView methods
 	virtual BOOL Create(LPCTSTR lpszClassName, LPCTSTR lpszWindowName, DWORD dwStyle, const RECT& rect, CWnd* pParentWnd, UINT nID, CCreateContext* pContext = NULL);
-	virtual void OnInitialUpdate(); // init update
+	virtual void OnInitialUpdate();
 	virtual BOOL DestroyWindow();
 
-	afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor); // change background color
+	// change background color
+	afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor);
 
 	// control button
 	afx_msg void OnLButtonDown(UINT nFlags, CPoint point);

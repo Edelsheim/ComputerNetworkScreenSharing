@@ -5,10 +5,6 @@
 #include "MessageQueue.h"
 #include <string>
 
-//
-// https://afsdzvcx123.tistory.com/99
-//
-
 CClientSocket::CClientSocket() : CSocket()
 {
 }

@@ -3,10 +3,6 @@
 #include "CClient.h"
 #include "MessageQueue.h"
 
-//
-// https://afsdzvcx123.tistory.com/98
-//
-
 CListenSocket::CListenSocket() : CAsyncSocket()
 {
 
