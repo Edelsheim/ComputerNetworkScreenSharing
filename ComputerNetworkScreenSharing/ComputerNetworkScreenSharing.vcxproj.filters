@@ -51,6 +51,7 @@
     <ClInclude Include="CClientSocket.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
+    <ClInclude Include="PointDataList.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
   </ItemGroup>
