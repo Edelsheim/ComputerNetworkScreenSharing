@@ -13,6 +13,7 @@
 #endif
 
 #include "MessageQueue.h"
+#include "DrawingQueue.h"
 #include "CListenSocket.h"
 #include "CClientSocket.h"
 
@@ -209,10 +210,7 @@ HCURSOR CComputerNetworkScreenSharingDlg::OnQueryDragIcon()
 
 afx_msg LRESULT CComputerNetworkScreenSharingDlg::OnPop(WPARAM wParam, LPARAM lParam)
 {
-	bool check = false;
-	std::wstring message_wstr = StaticQueue::GetMessageQueue()->Pop(check);
-	if (check == false)
-		return 1;
+	std::wstring message_wstr = MessageQueue::GetInstance()->Pop();
 	
 	if (!message_wstr.empty())
 		LogList.InsertString(0, message_wstr.c_str());
@@ -253,7 +251,7 @@ void CComputerNetworkScreenSharingDlg::ServerRun()
 		if (server->Listen(5))
 		{
 			// success log
-			StaticQueue::GetMessageQueue()->Push(L"Socket Server Open");
+			MessageQueue::GetInstance()->Push(L"Socket Server Open");
 			ServerRunButton.SetWindowTextW(_T("Server Close"));
 			ServerRunButton.EnableWindow(TRUE);
 		}
@@ -267,7 +265,7 @@ void CComputerNetworkScreenSharingDlg::ServerRun()
 			server = nullptr;
 
 			ServerRunButton.EnableWindow(TRUE);
-			StaticQueue::GetMessageQueue()->Push(L"Error Code("+ std::to_wstring(error_code) + L")");
+			MessageQueue::GetInstance()->Push(L"Error Code("+ std::to_wstring(error_code) + L")");
 		}
 	}
 	else
@@ -280,7 +278,7 @@ void CComputerNetworkScreenSharingDlg::ServerRun()
 		server = nullptr;
 
 		ServerRunButton.EnableWindow(TRUE);
-		StaticQueue::GetMessageQueue()->Push(L"Error Code(" + std::to_wstring(error_code) + L")");
+		MessageQueue::GetInstance()->Push(L"Error Code(" + std::to_wstring(error_code) + L")");
 	}
 }
 
@@ -290,7 +288,7 @@ void CComputerNetworkScreenSharingDlg::OnBnClickedServerrun()
 	{
 		ServerRunButton.EnableWindow(FALSE);
 
-		StaticQueue::GetMessageQueue()->Push(L"Socket Server Close");
+		MessageQueue::GetInstance()->Push(L"Socket Server Close");
 
 		server->Close();
 		delete server;
@@ -329,12 +327,12 @@ void CComputerNetworkScreenSharingDlg::OnClickedConnectbutton()
 	{
 		str.append(L" connected");
 		dwView->isClient = true;
-		StaticQueue::GetMessageQueue()->Push(str);
+		MessageQueue::GetInstance()->Push(str);
 	}
 	else
 	{
 		str.append(L" fail");
-		StaticQueue::GetMessageQueue()->Push(str);
+		MessageQueue::GetInstance()->Push(str);
 	}
 }
 
@@ -354,7 +352,7 @@ UINT CComputerNetworkScreenSharingDlg::OnServerThread(LPVOID param)
 {
 	CComputerNetworkScreenSharingDlg* dlg = (CComputerNetworkScreenSharingDlg*)param;
 
-	StaticQueue::GetMessageQueue()->Push(L"Server Thread run");
+	MessageQueue::GetInstance()->Push(L"Server Thread run");
 	while (1)
 	{
 		PostMessageA(dlg->m_hWnd, WM_SENDDRAW, NULL, NULL);
@@ -365,12 +363,11 @@ UINT CComputerNetworkScreenSharingDlg::OnServerThread(LPVOID param)
 
 afx_msg LRESULT CComputerNetworkScreenSharingDlg::OnSenddraw(WPARAM wParam, LPARAM lParam)
 {
-	bool check = false;
-	PointData point = StaticQueue::GetSendQueue()->Pop(check);
-	if (check == false)
-		return 1;
+	PointData point = DrawingQueue::GetSendQueue()->Pop();
 	if (point.x == -1 || point.y == -1)
+	{
 		return 1;
+	}
 	
 	std::string message_str = point.ToString();
 	char message[DATA_SIZE] = { 0, };

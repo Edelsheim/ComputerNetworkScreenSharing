@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "CClientSocket.h"
 
+#include "DrawingQueue.h"
 #include "MessageQueue.h"
 #include <string>
 
@@ -14,6 +15,7 @@ CClientSocket::~CClientSocket()
 
 void CClientSocket::OnConnect(int nErrorCode)
 {
+	MessageQueue::GetInstance()->Push(std::to_wstring(nErrorCode));
 	CSocket::OnConnect(nErrorCode);
 }
 
@@ -56,7 +58,7 @@ void CClientSocket::OnReceive(int nErrorCode)
 		point_data.x = point_x;
 		point_data.y = point_y;
 
-		StaticQueue::GetReceiveQueue()->Push(point_data);
+		DrawingQueue::GetReceiveQueue()->Push(point_data);
 	}
 	CSocket::OnReceive(nErrorCode);
 }

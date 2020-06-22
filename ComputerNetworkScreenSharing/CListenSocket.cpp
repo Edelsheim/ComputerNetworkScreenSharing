@@ -33,12 +33,12 @@ void CListenSocket::OnAccept(int nErrorCode)
 	if (check == FALSE)
 	{
 		delete client;
-		StaticQueue::GetMessageQueue()->Push(L"Accept new client fail");
+		MessageQueue::GetInstance()->Push(L"Accept new client fail");
 		return;
 	}
 	else
 	{
-		StaticQueue::GetMessageQueue()->Push(L"Accept new client");
+		MessageQueue::GetInstance()->Push(L"Accept new client");
 		client->SetListenSocket(this); // set client's follw this socket
 		clientSocketList.AddTail(client); // add to client list
 		CAsyncSocket::OnAccept(nErrorCode);

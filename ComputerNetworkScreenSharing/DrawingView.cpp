@@ -6,6 +6,7 @@
 #include "DrawingView.h"
 
 #include "MessageQueue.h"
+#include "DrawingQueue.h"
 
 // DrawingView
 
@@ -111,11 +112,7 @@ void DrawingView::OnLButtonDown(UINT nFlags, CPoint point)
 	}
 	
 	// push to type is 'click'
-	PointData point_data;
-	point_data.type = 'c';
-	point_data.x = point.x;
-	point_data.y = point.y;
-	StaticQueue::GetSendQueue()->Push(point_data);
+	DrawingQueue::GetSendQueue()->Push(point, 'c');
 	CFormView::OnLButtonDown(nFlags, point);
 }
 
@@ -130,11 +127,7 @@ void DrawingView::OnMouseMove(UINT nFlags, CPoint point)
 		GetClientRect(&my_rect);
 
 		// push to type is 'move'
-		PointData point_data;
-		point_data.type = 'm';
-		point_data.x = point.x;
-		point_data.y = point.y;
-		StaticQueue::GetSendQueue()->Push(point_data);
+		DrawingQueue::GetSendQueue()->Push(point, 'm');
 		if (!isClient)
 		{
 			if (point.x <= my_rect.left + 3)
@@ -179,10 +172,7 @@ void DrawingView::OnMouseMove(UINT nFlags, CPoint point)
 
 afx_msg LRESULT DrawingView::OnDrawpop(WPARAM wParam, LPARAM lParam)
 {
-	bool check = false;
-	PointData point = StaticQueue::GetReceiveQueue()->Pop(check);
-	if (check == false)
-		return 1;
+	PointData point = DrawingQueue::GetReceiveQueue()->Pop();
 	if (point.x <= -1 || point.y <= -1)
 		return 1;
 
@@ -242,7 +232,7 @@ afx_msg LRESULT DrawingView::OnDrawpop(WPARAM wParam, LPARAM lParam)
 
 	if (!isClient)
 	{
-		StaticQueue::GetSendQueue()->Push(point);
+		DrawingQueue::GetSendQueue()->Push(point);
 	}
 
 	return 0;
@@ -251,7 +241,7 @@ afx_msg LRESULT DrawingView::OnDrawpop(WPARAM wParam, LPARAM lParam)
 UINT DrawingView::threadReceiveQeueuRunner(LPVOID param)
 {
 	DrawingView* thisView = (DrawingView*)param;
-	StaticQueue::GetMessageQueue()->Push(L"Thread Receive Qeueu Runner");
+	MessageQueue::GetInstance()->Push(L"Thread Receive Qeueu Runner");
 	while (1)
 	{
 		PostMessageA(thisView->m_hWnd, WM_DRAWPOP, NULL, NULL);
@@ -263,5 +253,5 @@ UINT DrawingView::threadReceiveQeueuRunner(LPVOID param)
 void DrawingView::ClientRun()
 {
 	isClient = true;
-	StaticQueue::GetMessageQueue()->Push(L"Drawing View Client Run");
+	MessageQueue::GetInstance()->Push(L"Drawing View Client Run");
 }

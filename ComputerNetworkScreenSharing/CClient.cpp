@@ -3,6 +3,7 @@
 #include "CListenSocket.h"
 
 #include "MessageQueue.h"
+#include "DrawingQueue.h"
 
 CClient::CClient()
 {
@@ -33,10 +34,7 @@ void CClient::OnReceive(int nErrorCode)
 	
 	GetPeerName(peerIP, peerPort);
 
-	std::wstring message = peerIP.operator LPCWSTR();
-	message.append(L":");
-	message.append(std::to_wstring(peerPort));
-	StaticQueue::GetMessageQueue()->Push(L"Client on receive : " + message);
+	MessageQueue::GetInstance()->Push(L"Client on receive");
 
 	char data[DATA_SIZE] = { 0, };
 	int len = 0;
@@ -61,7 +59,7 @@ void CClient::OnReceive(int nErrorCode)
 		point_data.x = point_x;
 		point_data.y = point_y;
 
-		StaticQueue::GetReceiveQueue()->Push(point_data);
+		DrawingQueue::GetReceiveQueue()->Push(point_data);
 	}
 
 	CSocket::OnReceive(nErrorCode);

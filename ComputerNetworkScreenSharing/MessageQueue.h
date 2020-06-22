@@ -2,47 +2,34 @@
 
 #include <iostream>
 #include <concurrent_queue.h>
-#include "PointData.h"
 
-template<class T>
 class MessageQueue
 {
 private:
-	Concurrency::concurrent_queue<T> qeueu;
-
-public:
 	MessageQueue() {};
 	~MessageQueue() {};
+	Concurrency::concurrent_queue<std::wstring> qeueu;
 
-	void Push(T message)
+public:
+	static MessageQueue* GetInstance() {
+		static MessageQueue q;
+		return &q;
+	}
+
+	void Push(std::wstring message)
 	{
 		this->qeueu.push(message);
 	}
 
-	T Pop(bool& pop_result)
+	std::wstring Pop()
 	{
-		T result;
-		pop_result = this->qeueu.try_pop(result);
-		return result;
+		std::wstring result;
+		if (this->qeueu.try_pop(result)) {
+			return result;
+		}
+		else {
+			return L"";
+		}
 	}
 };
 
-namespace StaticQueue
-{
-	static MessageQueue<std::wstring>* GetMessageQueue() {
-		static MessageQueue<std::wstring> q;
-		return &q;
-	};
-
-	static MessageQueue<PointData>* GetReceiveQueue()
-	{
-		static MessageQueue<PointData> receiveQueue;
-		return &receiveQueue;
-	}
-
-	static MessageQueue<PointData>* GetSendQueue()
-	{
-		static MessageQueue<PointData> sendQueue;
-		return &sendQueue;
-	}
-}
