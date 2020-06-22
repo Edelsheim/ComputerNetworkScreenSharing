@@ -34,7 +34,10 @@ void CClient::OnReceive(int nErrorCode)
 	
 	GetPeerName(peerIP, peerPort);
 
-	MessageQueue::GetInstance()->Push(L"Client on receive");
+	std::wstring peer_info = peerIP.operator LPCWSTR();
+	peer_info.append(L":");
+	peer_info.append(std::to_wstring(peerPort));
+	//MessageQueue::GetInstance()->Push(L"Client on receive " + peer_info);
 
 	char data[DATA_SIZE] = { 0, };
 	int len = 0;
@@ -47,7 +50,6 @@ void CClient::OnReceive(int nErrorCode)
 		point_x += (data[3] - '0') * 100;
 		point_x += (data[4] - '0') * 10;
 		point_x += data[5] - '0';
-
 		char y = data[6];
 		LONG point_y = (data[7] - '0') * 1000;
 		point_y += (data[8] - '0') * 100;
@@ -61,7 +63,6 @@ void CClient::OnReceive(int nErrorCode)
 
 		DrawingQueue::GetReceiveQueue()->Push(point_data);
 	}
-
 	CSocket::OnReceive(nErrorCode);
 }
 

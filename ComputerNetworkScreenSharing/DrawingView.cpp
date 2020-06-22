@@ -17,8 +17,6 @@ DrawingView::DrawingView()
 {
 	this->point.x = -1;
 	this->point.y = -1;
-	this->receivePoint.x = -1;
-	this->receivePoint.y = -1;
 	isClient = false;
 	threadReceiveQueue = nullptr;
 }
@@ -75,8 +73,6 @@ void DrawingView::OnInitialUpdate()
 
 	this->point.x = -1;
 	this->point.y = -1;
-	this->receivePoint.x = -1;
-	this->receivePoint.y = -1;
 
 	threadReceiveQueue = AfxBeginThread(threadReceiveQeueuRunner, this);
 }
@@ -112,7 +108,7 @@ void DrawingView::OnLButtonDown(UINT nFlags, CPoint point)
 	}
 	
 	// push to type is 'click'
-	DrawingQueue::GetSendQueue()->Push(point, 'c');
+	DrawingQueue::GetSendQueue()->Push(point, CLICK_DATA);
 	CFormView::OnLButtonDown(nFlags, point);
 }
 
@@ -127,7 +123,7 @@ void DrawingView::OnMouseMove(UINT nFlags, CPoint point)
 		GetClientRect(&my_rect);
 
 		// push to type is 'move'
-		DrawingQueue::GetSendQueue()->Push(point, 'm');
+		DrawingQueue::GetSendQueue()->Push(point, MOVE_DATA);
 		if (!isClient)
 		{
 			if (point.x <= my_rect.left + 3)

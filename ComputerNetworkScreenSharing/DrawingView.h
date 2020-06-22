@@ -2,12 +2,17 @@
 
 // DrawingView 폼 보기
 
+#include <iostream>
+#include <concurrent_unordered_map.h>
+typedef Concurrency::concurrent_unordered_map<std::wstring, CPoint> ClientCPointMap;
+
 class DrawingView : public CFormView
 {
 	DECLARE_DYNCREATE(DrawingView)
 
 private:
 	CPoint point; // draw point
+	//ClientCPointMap receivePoint;
 	CPoint receivePoint;
 
 public:

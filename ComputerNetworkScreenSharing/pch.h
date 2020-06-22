@@ -15,5 +15,8 @@
 #define WM_SENDDRAW WM_APP + 3
 
 #define DATA_SIZE 12
+#define ACCEPT_DATA 'a'
+#define CLICK_DATA 'c'
+#define MOVE_DATA 'm'
 
 #endif //PCH_H

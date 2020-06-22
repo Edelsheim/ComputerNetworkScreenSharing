@@ -186,6 +186,7 @@
   <ItemGroup>
     <ClInclude Include="CClient.h" />
     <ClInclude Include="CClientSocket.h" />
+    <ClInclude Include="ClientMap.h" />
     <ClInclude Include="CListenSocket.h" />
     <ClInclude Include="ComputerNetworkScreenSharing.h" />
     <ClInclude Include="ComputerNetworkScreenSharingDlg.h" />

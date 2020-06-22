@@ -5,6 +5,7 @@ class PointData
 {
 public:
 	char type;
+	char name[11];
 	LONG x;
 	LONG y;
 

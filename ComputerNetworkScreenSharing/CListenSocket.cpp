@@ -2,10 +2,11 @@
 #include "CListenSocket.h"
 #include "CClient.h"
 #include "MessageQueue.h"
+#include "DrawingQueue.h"
 
 CListenSocket::CListenSocket() : CAsyncSocket()
 {
-
+	PlayerIndex = 0;
 }
 
 CListenSocket::~CListenSocket()
