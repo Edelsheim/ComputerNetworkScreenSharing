@@ -25,10 +25,15 @@ public:
 		queue.push(point);
 	}
 
-	void Push(CPoint point, char type)
+	void Push(CPoint point, char type, std::string id)
 	{
 		PointData point_data;
 		point_data.type = type;
+
+		int i = 0;
+		for (i = 0; i != CLIENT_NAME_SIZE - 1; i++)
+			point_data.id[i] = id.c_str()[i];
+		point_data.id[i] = '\0';
 		point_data.x = point.x;
 		point_data.y = point.y;
 		Push(point_data);
