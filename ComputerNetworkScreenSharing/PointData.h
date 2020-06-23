@@ -5,13 +5,13 @@ class PointData
 {
 public:
 	char type;
-	char name[CLIENT_NAME_SIZE];
+	char id[CLIENT_NAME_SIZE];
 	LONG x;
 	LONG y;
 
 	PointData() {
 		type = 'c';
-		name[0] = '\0';
+		id[0] = '\0';
 		x = -1;
 		y = -1;
 	};
@@ -57,7 +57,7 @@ public:
 		result += std::to_string(num);
 
 		for (int i = 0; i != CLIENT_NAME_SIZE; i++)
-			result += name[i];
+			result += id[i];
 
 		return result;
 	}

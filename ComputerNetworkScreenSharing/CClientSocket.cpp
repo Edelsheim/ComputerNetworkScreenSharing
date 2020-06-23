@@ -57,7 +57,7 @@ void CClientSocket::OnReceive(int nErrorCode)
 		PointData point_data;
 		point_data.type = type;
 		for (int i = 0; i != CLIENT_NAME_SIZE; i++)
-			point_data.name[i] = data[11 + i];
+			point_data.id[i] = data[11 + i];
 		point_data.x = point_x;
 		point_data.y = point_y;
 		DrawingQueue::GetReceiveQueue()->Push(point_data);

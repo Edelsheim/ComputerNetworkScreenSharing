@@ -81,8 +81,8 @@ void CClient::OnReceive(int nErrorCode)
 
 		int i = 0;
 		for (i = 0; i != client_value.length(); i++)
-			point_data.name[i] = client_value.c_str()[i];
-		point_data.name[i] = '\0';
+			point_data.id[i] = client_value.c_str()[i];
+		point_data.id[i] = '\0';
 		point_data.x = point_x;
 		point_data.y = point_y;
 
