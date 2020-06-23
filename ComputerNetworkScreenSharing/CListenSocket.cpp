@@ -8,6 +8,16 @@
 CListenSocket::CListenSocket() : CAsyncSocket()
 {
 	PlayerIndex = 1;
+	
+	// insert to server
+	// server:000000000000
+	CString key;
+	CString cstring_format = _T("%0");
+	cstring_format.Append(std::to_wstring(CLIENT_NAME_SIZE - 1).c_str());
+	cstring_format.Append(_T("ld"));
+	key.Format(cstring_format, 0);
+	std::string value = CT2CA(key);
+	ClientMap::GetClientMap()->Insert(L"server", value);
 }
 
 CListenSocket::~CListenSocket()
