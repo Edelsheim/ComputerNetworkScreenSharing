@@ -39,7 +39,7 @@ public:
 		}
 	}
 
-	void Insert(std::wstring key, CPoint point, char type)
+	void Insert(std::wstring key, CPoint point, char type, char* name)
 	{
 		PointData point_data;
 		point_data.type = type;
