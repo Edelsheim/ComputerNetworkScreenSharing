@@ -190,6 +190,7 @@
     <ClInclude Include="CListenSocket.h" />
     <ClInclude Include="ComputerNetworkScreenSharing.h" />
     <ClInclude Include="ComputerNetworkScreenSharingDlg.h" />
+    <ClInclude Include="ConnectList.h" />
     <ClInclude Include="DrawingQueue.h" />
     <ClInclude Include="DrawingView.h" />
     <ClInclude Include="framework.h" />
