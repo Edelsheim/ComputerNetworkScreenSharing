@@ -29,15 +29,17 @@ void CClientSocket::OnClose(int nErrorCode)
 
 void CClientSocket::OnReceive(int nErrorCode)
 {
+	/*
 	CString peerIP = _T("");
 	UINT peerPort = 0;
 
 	GetPeerName(peerIP, peerPort);
+	*/
 
-	char data[DATA_SIZE] = { 0, };
+	char data[DATA_SIZE + CLIENT_NAME_SIZE] = { 0, };
 	int len = 0;
 
-	if ((len = Receive(data, sizeof(char) * DATA_SIZE)) > 0)
+	if ((len = Receive(data, sizeof(char) * (DATA_SIZE + CLIENT_NAME_SIZE))) > 0)
 	{
 		char type = data[0];
 		char x = data[1];
@@ -54,6 +56,8 @@ void CClientSocket::OnReceive(int nErrorCode)
 
 		PointData point_data;
 		point_data.type = type;
+		for (int i = 0; i != CLIENT_NAME_SIZE; i++)
+			point_data.name[i] = data[11 + i];
 		point_data.x = point_x;
 		point_data.y = point_y;
 		DrawingQueue::GetReceiveQueue()->Push(point_data);
