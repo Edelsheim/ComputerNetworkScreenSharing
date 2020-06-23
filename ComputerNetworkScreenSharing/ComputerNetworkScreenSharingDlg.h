@@ -64,6 +64,10 @@ private:
 	CWinThread* client_thread;
 	CWinThread* server_thread;
 
+	// list process
+	// Drawing View
+
+	
 public:
 	afx_msg void OnBnClickedServerrun();
 	afx_msg void OnClickedConnectbutton();

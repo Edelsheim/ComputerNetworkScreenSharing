@@ -7,7 +7,7 @@
 #include "pch.h"
 #include "PointData.h"
 typedef Concurrency::concurrent_vector<PointData> PointDataVector;
-typedef Concurrency::concurrent_unordered_map<std::string, PointDataVector> PointDataListMap;
+typedef Concurrency::concurrent_unordered_map<std::wstring, PointDataVector> PointDataListMap;
 
 class PointDataList
 {
@@ -22,7 +22,7 @@ public:
 	}
 
 	PointDataListMap point_data_map;
-	void Insert(std::string key, PointData value)
+	void Insert(std::wstring key, PointData value)
 	{
 		if (point_data_map.find(key) == point_data_map.end())
 		{
@@ -38,7 +38,7 @@ public:
 		}
 	}
 
-	void Insert(std::string key, CPoint point, char type, std::string id)
+	void Insert(std::wstring key, CPoint point, char type, std::string id)
 	{
 		PointData point_data;
 		point_data.type = type;

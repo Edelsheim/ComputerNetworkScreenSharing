@@ -57,7 +57,12 @@ public:
 	// view thread runner call
 	void ClientRun();
 
+	// getter, setter
+	void SetName(std::wstring Name) { this->Name = std::wstring(Name.c_str()); };
+	std::wstring GetName() { return this->Name; };
+
 private:
+	std::wstring Name;
 	CWinThread* threadReceiveQueue;
 };
 
