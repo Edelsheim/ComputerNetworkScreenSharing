@@ -178,53 +178,72 @@ afx_msg LRESULT DrawingView::OnDrawpop(WPARAM wParam, LPARAM lParam)
 	RECT my_rect;
 	GetClientRect(&my_rect);
 
+	std::string client_name = std::string(point.name);
+
+	// new client
+	if (this->receivePointes.find(client_name) == this->receivePointes.end())
+	{
+		CPoint data;
+		data.x = point.x;
+		data.y = point.y;
+		this->receivePointes.insert(std::make_pair(client_name, data));
+	}
+
+	/*
 	// check this is first
-	if (this->receivePoint.x == -1)
-		this->receivePoint = point.x;
-	if (this->receivePoint.y == -1)
-		this->receivePoint.y = point.y;
+	if (this->receivePointes.at(client_name).x == -1)
+		this->receivePointes.at(client_name).x = point.x;
+	if (this->receivePointes.at(client_name).y == -1)
+		this->receivePointes.at(client_name).y = point.y;
+	*/
+
+	LONG x = this->receivePointes.at(client_name).x;
+	LONG y = this->receivePointes.at(client_name).y;
 
 	if (point.type == 'c') // check type is 'click'
 	{
 		dc.MoveTo(point.x, point.y);
-		this->receivePoint.x = point.x;
-		this->receivePoint.y = point.y;
+		this->receivePointes.at(client_name).x = point.x;
+		this->receivePointes.at(client_name).y = point.y;
 	}
 	else if (point.x <= my_rect.left + 3)
 	{
 		dc.MoveTo(my_rect.left, point.y);
 		dc.LineTo(point.x, point.y);
-		this->receivePoint.x = point.x;
-		this->receivePoint.y = point.y;
+		this->receivePointes.at(client_name).x = point.x;
+		this->receivePointes.at(client_name).y = point.y;
 	}
 	else if (point.x >= my_rect.right - 3)
 	{
 		dc.MoveTo(my_rect.right, point.y);
 		dc.LineTo(point.x, point.y);
-		this->receivePoint.x = point.x;
-		this->receivePoint.y = point.y;
+		this->receivePointes.at(client_name).x = point.x;
+		this->receivePointes.at(client_name).y = point.y;
 	}
 	else if (point.y <= my_rect.top + 3)
 	{
 		dc.MoveTo(point.x, my_rect.top);
 		dc.LineTo(point.x, point.y);
-		this->receivePoint.x = point.x;
-		this->receivePoint.y = point.y;
+		this->receivePointes.at(client_name).x = point.x;
+		this->receivePointes.at(client_name).y = point.y;
 	}
 	else if (point.y >= my_rect.bottom - 3)
 	{
 		dc.MoveTo(point.x, my_rect.bottom);
 		dc.LineTo(point.x, point.y);
-		this->receivePoint.x = point.x;
-		this->receivePoint.y = point.y;
+		this->receivePointes.at(client_name).x = point.x;
+		this->receivePointes.at(client_name).y = point.y;
 	}
 	else
 	{
-		dc.MoveTo(this->receivePoint.x, this->receivePoint.y);
+		dc.MoveTo(x, y);
 		dc.LineTo(point.x, point.y);
-		this->receivePoint.x = point.x;
-		this->receivePoint.y = point.y;
+		this->receivePointes.at(client_name).x = point.x;
+		this->receivePointes.at(client_name).y = point.y;
 	}
+
+	x = this->receivePointes.at(client_name).x;
+	y = this->receivePointes.at(client_name).y;
 
 	if (!isClient)
 	{

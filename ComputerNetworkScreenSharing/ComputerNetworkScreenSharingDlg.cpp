@@ -248,7 +248,7 @@ void CComputerNetworkScreenSharingDlg::ServerRun()
 
 	if (server->Create(port, SOCK_STREAM))
 	{
-		if (server->Listen(5))
+		if (server->Listen(100))
 		{
 			// success log
 			MessageQueue::GetInstance()->Push(L"Socket Server Open");

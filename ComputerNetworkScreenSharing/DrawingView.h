@@ -4,7 +4,7 @@
 
 #include <iostream>
 #include <concurrent_unordered_map.h>
-typedef Concurrency::concurrent_unordered_map<std::wstring, CPoint> ClientCPointMap;
+typedef Concurrency::concurrent_unordered_map<std::string, CPoint> ClientCPointMap;
 
 class DrawingView : public CFormView
 {
@@ -12,8 +12,8 @@ class DrawingView : public CFormView
 
 private:
 	CPoint point; // draw point
-	//ClientCPointMap receivePoint;
-	CPoint receivePoint;
+	ClientCPointMap receivePointes;
+	//CPoint receivePoint;
 
 public:
 #ifdef AFX_DESIGN_TIME
