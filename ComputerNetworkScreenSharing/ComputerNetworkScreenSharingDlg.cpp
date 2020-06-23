@@ -322,15 +322,16 @@ void CComputerNetworkScreenSharingDlg::OnClickedConnectbutton()
 	str.append(L":");
 	str.append(port);
 
+	dwView->isClient = true;
 	BOOL check = client->Connect(ip, _ttoi(port));
 	if (check)
 	{
 		str.append(L" connected");
-		dwView->isClient = true;
 		MessageQueue::GetInstance()->Push(str);
 	}
 	else
 	{
+		dwView->isClient = false;
 		str.append(L" fail");
 		MessageQueue::GetInstance()->Push(str);
 	}

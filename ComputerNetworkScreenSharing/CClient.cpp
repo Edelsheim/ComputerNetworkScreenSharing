@@ -80,7 +80,7 @@ void CClient::OnReceive(int nErrorCode)
 		point_data.type = type;
 
 		int i = 0;
-		for (i = 0; i != client_value.length(); i++)
+		for (i = 0; i != CLIENT_NAME_SIZE - 1; i++)
 			point_data.id[i] = client_value.c_str()[i];
 		point_data.id[i] = '\0';
 		point_data.x = point_x;
@@ -94,6 +94,12 @@ void CClient::OnReceive(int nErrorCode)
 
 void CClient::OnSend(int nErrorCode)
 {
-
 	CSocket::OnSend(nErrorCode);
+}
+
+
+int CClient::Send(const void* lpBuf, int nBufLen, int nFlags)
+{
+	// TODO: 여기에 특수화된 코드를 추가 및/또는 기본 클래스를 호출합니다.
+	return CSocket::Send(lpBuf, nBufLen, nFlags);
 }

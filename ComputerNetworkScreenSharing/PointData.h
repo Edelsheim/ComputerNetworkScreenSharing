@@ -11,7 +11,7 @@ public:
 
 	PointData() {
 		type = 'c';
-		id[0] = '\0';
+		memset(id, 0, CLIENT_NAME_SIZE);
 		x = -1;
 		y = -1;
 	};

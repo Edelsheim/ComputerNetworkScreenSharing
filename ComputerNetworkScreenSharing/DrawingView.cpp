@@ -21,7 +21,6 @@ DrawingView::DrawingView()
 	this->point.y = -1;
 	isClient = false;
 	threadReceiveQueue = nullptr;
-	threadClose = false;
 }
 
 DrawingView::~DrawingView()
@@ -82,10 +81,9 @@ void DrawingView::OnInitialUpdate()
 
 BOOL DrawingView::DestroyWindow()
 {
-	threadClose = true;
-
 	if (threadReceiveQueue != nullptr)
 	{
+		//WaitForSingleObject(threadReceiveQueue, 1000);
 		threadReceiveQueue->ExitInstance();
 		threadReceiveQueue = nullptr;
 	}
@@ -117,7 +115,7 @@ void DrawingView::OnLButtonDown(UINT nFlags, CPoint point)
 	// push to type is 'click'
 	std::string id = ClientMap::GetClientMap()->GetValue(L"server");
 	DrawingQueue::GetSendQueue()->Push(point, CLICK_DATA, id);
-	PointDataList::GetQueue()->Insert(id, point, CLICK_DATA, id);
+	//PointDataList::GetQueue()->Insert(id, point, CLICK_DATA, id);
 	CFormView::OnLButtonDown(nFlags, point);
 }
 
@@ -134,7 +132,7 @@ void DrawingView::OnMouseMove(UINT nFlags, CPoint point)
 		// push to type is 'move'
 		std::string id = ClientMap::GetClientMap()->GetValue(L"server");
 		DrawingQueue::GetSendQueue()->Push(point, CLICK_DATA, id);
-		PointDataList::GetQueue()->Insert(id, point, CLICK_DATA, id);
+		//PointDataList::GetQueue()->Insert(id, point, CLICK_DATA, id);
 
 		if (!isClient)
 		{
@@ -192,7 +190,7 @@ afx_msg LRESULT DrawingView::OnDrawpop(WPARAM wParam, LPARAM lParam)
 
 	// get client id
 	std::string client_id = std::string(point.id);
-	PointDataList::GetQueue()->Insert(client_id, point);
+	//PointDataList::GetQueue()->Insert(client_id, point);
 
 	// new client
 	if (this->receivePointes.find(client_id) == this->receivePointes.end())
@@ -267,8 +265,8 @@ afx_msg LRESULT DrawingView::OnDrawpop(WPARAM wParam, LPARAM lParam)
 UINT DrawingView::threadReceiveQeueuRunner(LPVOID param)
 {
 	DrawingView* thisView = (DrawingView*)param;
-	MessageQueue::GetInstance()->Push(L"Thread Receive Qeueu Runner");
-	while (thisView->threadClose == false)
+	MessageQueue::GetInstance()->Push(L"Thread Receive Queue Runner");
+	while (1)
 	{
 		PostMessageA(thisView->m_hWnd, WM_DRAWPOP, NULL, NULL);
 		Sleep(1);
