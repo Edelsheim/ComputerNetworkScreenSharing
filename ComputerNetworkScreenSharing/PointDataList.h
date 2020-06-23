@@ -7,15 +7,13 @@
 #include "pch.h"
 #include "PointData.h"
 typedef Concurrency::concurrent_vector<PointData> PointDataVector;
-typedef Concurrency::concurrent_unordered_map<std::wstring, PointDataVector> PointDataListMap;
+typedef Concurrency::concurrent_unordered_map<std::string, PointDataVector> PointDataListMap;
 
 class PointDataList
 {
 private:
 	PointDataList() {};
 	~PointDataList() {};
-
-	PointDataListMap point_data_map;
 public:
 
 	static PointDataList* GetQueue() {
@@ -23,7 +21,8 @@ public:
 		return &q;
 	}
 
-	void Insert(std::wstring key, PointData value)
+	PointDataListMap point_data_map;
+	void Insert(std::string key, PointData value)
 	{
 		if (point_data_map.find(key) == point_data_map.end())
 		{
@@ -39,28 +38,17 @@ public:
 		}
 	}
 
-	void Insert(std::wstring key, CPoint point, char type, char* name)
+	void Insert(std::string key, CPoint point, char type, std::string id)
 	{
 		PointData point_data;
 		point_data.type = type;
 		point_data.x = point.x;
 		point_data.y = point.y;
+		int i = 0;
+		for (int i = 0; i != CLIENT_NAME_SIZE - 1; i++)
+			point_data.id[i] = id.c_str()[i];
+		point_data.id[i] = '\0';
 		Insert(key, point_data);
-	}
-
-	PointDataVector GetValue(std::wstring key)
-	{
-
-		if (point_data_map.find(key) == point_data_map.end())
-		{
-			PointDataVector data;
-			data.clear();
-			return data;
-		}
-		else
-		{
-			return point_data_map.at(key);
-		}
 	}
 };
 

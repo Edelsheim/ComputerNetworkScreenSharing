@@ -53,6 +53,7 @@ public:
 
 	// thread runner
 	static UINT threadReceiveQeueuRunner(LPVOID param);
+	bool threadClose;
 
 	// view thread runner call
 	void ClientRun();
