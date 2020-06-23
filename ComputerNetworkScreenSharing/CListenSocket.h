@@ -1,5 +1,8 @@
 #pragma once
 #include <afxsock.h>
+
+static LONG PlayerIndex;
+
 class CListenSocket :
 	public CAsyncSocket
 {
@@ -13,4 +16,3 @@ public:
 	void BroadCast(void* message, int len);
 	virtual void OnReceive(int nErrorCode);
 };
-

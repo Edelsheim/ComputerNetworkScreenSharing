@@ -4,6 +4,7 @@
 
 #include "MessageQueue.h"
 #include "DrawingQueue.h"
+#include "ClientMap.h"
 
 CClient::CClient()
 {
@@ -34,7 +35,29 @@ void CClient::OnReceive(int nErrorCode)
 	
 	GetPeerName(peerIP, peerPort);
 
-	MessageQueue::GetInstance()->Push(L"Client on receive");
+	std::wstring peer_info = peerIP.operator LPCWSTR();
+	peer_info.append(L":");
+	peer_info.append(std::to_wstring(peerPort));
+
+	//MessageQueue::GetInstance()->Push(L"Client on receive " + peer_info);
+
+	// get client value (player index)
+	std::string client_value = ClientMap::GetClientMap()->GetValue(peer_info);
+	if (client_value.compare("") == 0)
+	{
+		// unknown client
+		CString unknownClient;
+		CString value_format = _T("%0");
+		value_format.Append(std::to_wstring(CLIENT_NAME_SIZE - 1).c_str());
+		value_format.Append(_T("ld"));
+		unknownClient.Format(value_format, PlayerIndex);
+		PlayerIndex++;
+
+		// CString to string
+		client_value = CT2CA(unknownClient);
+
+		ClientMap::GetClientMap()->Insert(peer_info, client_value);
+	}
 
 	char data[DATA_SIZE] = { 0, };
 	int len = 0;
@@ -47,7 +70,6 @@ void CClient::OnReceive(int nErrorCode)
 		point_x += (data[3] - '0') * 100;
 		point_x += (data[4] - '0') * 10;
 		point_x += data[5] - '0';
-
 		char y = data[6];
 		LONG point_y = (data[7] - '0') * 1000;
 		point_y += (data[8] - '0') * 100;
@@ -56,12 +78,16 @@ void CClient::OnReceive(int nErrorCode)
 
 		PointData point_data;
 		point_data.type = type;
+
+		int i = 0;
+		for (i = 0; i != client_value.length(); i++)
+			point_data.id[i] = client_value.c_str()[i];
+		point_data.id[i] = '\0';
 		point_data.x = point_x;
 		point_data.y = point_y;
 
 		DrawingQueue::GetReceiveQueue()->Push(point_data);
 	}
-
 	CSocket::OnReceive(nErrorCode);
 }
 

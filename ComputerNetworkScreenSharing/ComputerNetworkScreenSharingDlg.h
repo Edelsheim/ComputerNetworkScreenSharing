@@ -72,5 +72,6 @@ public:
 	// thread function
 	static UINT OnLogThread(LPVOID param);
 	static UINT OnServerThread(LPVOID param);
-
 };
+
+static BOOL isClose;

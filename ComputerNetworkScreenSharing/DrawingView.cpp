@@ -7,6 +7,7 @@
 
 #include "MessageQueue.h"
 #include "DrawingQueue.h"
+#include "ClientMap.h"
 
 // DrawingView
 
@@ -17,8 +18,6 @@ DrawingView::DrawingView()
 {
 	this->point.x = -1;
 	this->point.y = -1;
-	this->receivePoint.x = -1;
-	this->receivePoint.y = -1;
 	isClient = false;
 	threadReceiveQueue = nullptr;
 }
@@ -75,8 +74,6 @@ void DrawingView::OnInitialUpdate()
 
 	this->point.x = -1;
 	this->point.y = -1;
-	this->receivePoint.x = -1;
-	this->receivePoint.y = -1;
 
 	threadReceiveQueue = AfxBeginThread(threadReceiveQeueuRunner, this);
 }
@@ -88,6 +85,8 @@ BOOL DrawingView::DestroyWindow()
 		threadReceiveQueue->ExitInstance();
 		threadReceiveQueue = nullptr;
 	}
+
+	receivePointes.clear();
 
 	return CFormView::DestroyWindow();
 }
@@ -110,9 +109,10 @@ void DrawingView::OnLButtonDown(UINT nFlags, CPoint point)
 		this->point.x = point.x;
 		this->point.y = point.y;
 	}
-	
+
 	// push to type is 'click'
-	DrawingQueue::GetSendQueue()->Push(point, 'c');
+	std::string id = ClientMap::GetClientMap()->GetValue(L"server");
+	DrawingQueue::GetSendQueue()->Push(point, CLICK_DATA, id);
 	CFormView::OnLButtonDown(nFlags, point);
 }
 
@@ -127,7 +127,8 @@ void DrawingView::OnMouseMove(UINT nFlags, CPoint point)
 		GetClientRect(&my_rect);
 
 		// push to type is 'move'
-		DrawingQueue::GetSendQueue()->Push(point, 'm');
+		std::string id = ClientMap::GetClientMap()->GetValue(L"server");
+		DrawingQueue::GetSendQueue()->Push(point, MOVE_DATA, id);
 		if (!isClient)
 		{
 			if (point.x <= my_rect.left + 3)
@@ -182,52 +183,69 @@ afx_msg LRESULT DrawingView::OnDrawpop(WPARAM wParam, LPARAM lParam)
 	RECT my_rect;
 	GetClientRect(&my_rect);
 
+	// get client id
+	std::string client_id = std::string(point.id);
+
+	// new client
+	if (this->receivePointes.find(client_id) == this->receivePointes.end())
+	{
+		CPoint data;
+		data.x = point.x;
+		data.y = point.y;
+		this->receivePointes.insert(std::make_pair(client_id, data));
+	}
+
+	/*
 	// check this is first
-	if (this->receivePoint.x == -1)
-		this->receivePoint = point.x;
-	if (this->receivePoint.y == -1)
-		this->receivePoint.y = point.y;
+	if (this->receivePointes.at(client_id).x == -1)
+		this->receivePointes.at(client_id).x = point.x;
+	if (this->receivePointes.at(client_id).y == -1)
+		this->receivePointes.at(client_id).y = point.y;
+	*/
 
 	if (point.type == 'c') // check type is 'click'
 	{
 		dc.MoveTo(point.x, point.y);
-		this->receivePoint.x = point.x;
-		this->receivePoint.y = point.y;
+		this->receivePointes.at(client_id).x = point.x;
+		this->receivePointes.at(client_id).y = point.y;
 	}
-	else if (point.x <= my_rect.left + 3)
+	else if (point.x <= my_rect.left + 2)
 	{
 		dc.MoveTo(my_rect.left, point.y);
 		dc.LineTo(point.x, point.y);
-		this->receivePoint.x = point.x;
-		this->receivePoint.y = point.y;
+		this->receivePointes.at(client_id).x = point.x;
+		this->receivePointes.at(client_id).y = point.y;
 	}
 	else if (point.x >= my_rect.right - 3)
 	{
 		dc.MoveTo(my_rect.right, point.y);
 		dc.LineTo(point.x, point.y);
-		this->receivePoint.x = point.x;
-		this->receivePoint.y = point.y;
+		this->receivePointes.at(client_id).x = point.x;
+		this->receivePointes.at(client_id).y = point.y;
 	}
 	else if (point.y <= my_rect.top + 3)
 	{
 		dc.MoveTo(point.x, my_rect.top);
 		dc.LineTo(point.x, point.y);
-		this->receivePoint.x = point.x;
-		this->receivePoint.y = point.y;
+		this->receivePointes.at(client_id).x = point.x;
+		this->receivePointes.at(client_id).y = point.y;
 	}
 	else if (point.y >= my_rect.bottom - 3)
 	{
 		dc.MoveTo(point.x, my_rect.bottom);
 		dc.LineTo(point.x, point.y);
-		this->receivePoint.x = point.x;
-		this->receivePoint.y = point.y;
+		this->receivePointes.at(client_id).x = point.x;
+		this->receivePointes.at(client_id).y = point.y;
 	}
 	else
 	{
-		dc.MoveTo(this->receivePoint.x, this->receivePoint.y);
+		LONG x = this->receivePointes.at(client_id).x;
+		LONG y = this->receivePointes.at(client_id).y;
+
+		dc.MoveTo(x, y);
 		dc.LineTo(point.x, point.y);
-		this->receivePoint.x = point.x;
-		this->receivePoint.y = point.y;
+		this->receivePointes.at(client_id).x = point.x;
+		this->receivePointes.at(client_id).y = point.y;
 	}
 
 	if (!isClient)

@@ -58,10 +58,13 @@ CComputerNetworkScreenSharingDlg::CComputerNetworkScreenSharingDlg(CWnd* pParent
 	: CDialogEx(IDD_Main_DIALOG, pParent)
 {
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
-	log_thread = nullptr;
+	
 	server = nullptr;
 	client = nullptr;
 	dwView = nullptr;
+
+	isClose = false;
+	log_thread = nullptr;
 	client_thread = nullptr;
 	server_thread = nullptr;
 }
@@ -155,7 +158,6 @@ BOOL CComputerNetworkScreenSharingDlg::OnInitDialog()
 
 	log_thread = AfxBeginThread(OnLogThread, this);
 	server_thread = AfxBeginThread(OnServerThread, this);
-
 	return TRUE;  // 포커스를 컨트롤에 설정하지 않으면 TRUE를 반환합니다.
 }
 
@@ -248,7 +250,7 @@ void CComputerNetworkScreenSharingDlg::ServerRun()
 
 	if (server->Create(port, SOCK_STREAM))
 	{
-		if (server->Listen(5))
+		if (server->Listen(100))
 		{
 			// success log
 			MessageQueue::GetInstance()->Push(L"Socket Server Open");
@@ -339,8 +341,8 @@ void CComputerNetworkScreenSharingDlg::OnClickedConnectbutton()
 UINT CComputerNetworkScreenSharingDlg::OnLogThread(LPVOID param)
 {
 	CComputerNetworkScreenSharingDlg* dlg = (CComputerNetworkScreenSharingDlg*)param;
-
-	while (1)
+	
+	while (!isClose)
 	{
 		PostMessageA(dlg->m_hWnd, WM_POP, NULL, NULL);
 		Sleep(130);
@@ -353,7 +355,7 @@ UINT CComputerNetworkScreenSharingDlg::OnServerThread(LPVOID param)
 	CComputerNetworkScreenSharingDlg* dlg = (CComputerNetworkScreenSharingDlg*)param;
 
 	MessageQueue::GetInstance()->Push(L"Server Thread run");
-	while (1)
+	while (!isClose)
 	{
 		PostMessageA(dlg->m_hWnd, WM_SENDDRAW, NULL, NULL);
 		Sleep(1);
@@ -370,25 +372,25 @@ afx_msg LRESULT CComputerNetworkScreenSharingDlg::OnSenddraw(WPARAM wParam, LPAR
 	}
 	
 	std::string message_str = point.ToString();
-	char message[DATA_SIZE] = { 0, };
-	int i = 0;
-	for (i = 0; i != DATA_SIZE; i++)
-	{
-		if (message_str.c_str()[i] == '\0')
-		{
-			message[i] = '\0';
-			break;
-		}
-		message[i] = message_str.c_str()[i];
-	}
 
 	if (server != nullptr)
 	{
-		server->BroadCast(message, DATA_SIZE);
+		server->BroadCast((char*)message_str.c_str(), DATA_SIZE + CLIENT_NAME_SIZE);
 	}
 
 	if (dwView->isClient)
 	{
+		char message[DATA_SIZE] = { 0, };
+		int i = 0;
+		for (i = 0; i != DATA_SIZE; i++)
+		{
+			if (message_str.c_str()[i] == '\0')
+			{
+				message[i] = '\0';
+				break;
+			}
+			message[i] = message_str.c_str()[i];
+		}
 		client->Send(message, DATA_SIZE);
 	}
 	return 0;
@@ -398,12 +400,24 @@ afx_msg LRESULT CComputerNetworkScreenSharingDlg::OnSenddraw(WPARAM wParam, LPAR
 BOOL CComputerNetworkScreenSharingDlg::DestroyWindow()
 {
 	// TODO: 여기에 특수화된 코드를 추가 및/또는 기본 클래스를 호출합니다.
+	isClose = true;
+
+	HANDLE threades[3] = { log_thread, client_thread, server_thread };
+	WaitForMultipleObjects(3, threades, TRUE, 500);
 
 	if (log_thread != nullptr)
 	{
-		log_thread->ExitInstance();
 		log_thread = nullptr;
 	}
+	if (client_thread != nullptr)
+	{
+		client_thread = nullptr;
+	}
+	if (server_thread != nullptr)
+	{
+		server_thread = nullptr;
+	}
+
 	if (server != nullptr)
 	{
 		server->Close();
@@ -421,16 +435,6 @@ BOOL CComputerNetworkScreenSharingDlg::DestroyWindow()
 		dwView->DestroyWindow();
 		// delete dwView;
 		dwView = nullptr;
-	}
-	if (client_thread != nullptr)
-	{
-		client_thread->ExitInstance();
-		client_thread = nullptr;
-	}
-	if (server_thread != nullptr)
-	{
-		server_thread->ExitInstance();
-		server_thread = nullptr;
 	}
 	return CDialogEx::DestroyWindow();
 }
