@@ -4,6 +4,7 @@
 #include "MessageQueue.h"
 #include "DrawingQueue.h"
 #include "ClientMap.h"
+#include "PointDataList.h"
 
 CListenSocket::CListenSocket() : CAsyncSocket()
 {
@@ -83,6 +84,34 @@ void CListenSocket::OnAccept(int nErrorCode)
 		client->SetListenSocket(this); // set client's follw this socket
 		clientSocketList.AddTail(client); // add to client list
 		CAsyncSocket::OnAccept(nErrorCode);
+
+		
+		// send point data list
+		// synchro drawing point
+		PointDataListMap data_info = PointDataList::GetQueue()->point_data_map;
+		PointDataListMap::iterator data_info_iterator = data_info.begin();
+		while (1)
+		{
+			if (data_info_iterator == data_info.end())
+				break;
+			PointDataVector data = data_info_iterator->second;
+			PointDataVector::iterator data_iterator = data.begin();
+			while (1)
+			{
+				if (data_iterator == data.end())
+					break;
+
+				PointData data = (*data_iterator);
+				std::string message = data.ToString();
+				client->Send(message.c_str(), DATA_SIZE + CLIENT_NAME_SIZE);
+				
+				data_iterator++;
+			}
+
+			data_info_iterator++;
+		}
+		MessageQueue::GetInstance()->Push(L"Accept new client synchronization done");
+		
 	}
 }
 
