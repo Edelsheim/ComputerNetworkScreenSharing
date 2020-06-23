@@ -56,9 +56,7 @@ CComputerNetworkScreenSharingDlg::CComputerNetworkScreenSharingDlg(CWnd* pParent
 	: CDialogEx(IDD_Main_DIALOG, pParent)
 {
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
-	
-	server = nullptr;
-	client = nullptr;
+
 	dwView = nullptr;
 
 	isClose = false;
@@ -87,7 +85,6 @@ BEGIN_MESSAGE_MAP(CComputerNetworkScreenSharingDlg, CDialogEx)
 	ON_WM_MOUSEMOVE()
 	ON_BN_CLICKED(IDC_ServerRunButton, &CComputerNetworkScreenSharingDlg::OnBnClickedServerrun)
 	ON_BN_CLICKED(IDC_ConnectButton, &CComputerNetworkScreenSharingDlg::OnClickedConnectbutton)
-	ON_MESSAGE(WM_SENDDRAW, &CComputerNetworkScreenSharingDlg::OnSenddraw)
 END_MESSAGE_MAP()
 
 
@@ -155,7 +152,6 @@ BOOL CComputerNetworkScreenSharingDlg::OnInitDialog()
 	InitEditValue();
 
 	log_thread = AfxBeginThread(OnLogThread, this);
-	server_thread = AfxBeginThread(OnServerThread, this);
 	return TRUE;  // 포커스를 컨트롤에 설정하지 않으면 TRUE를 반환합니다.
 }
 
@@ -240,60 +236,36 @@ void CComputerNetworkScreenSharingDlg::InitDrawingView()
 
 void CComputerNetworkScreenSharingDlg::ServerRun()
 {
-	server = new CListenSocket;
 	CString portStr;
 	UINT port = 0;
 	ServerPort.GetWindowTextW(portStr);
 	port = _ttoi(portStr);
 
-	if (server->Create(port, SOCK_STREAM))
+	if (dwView->ServerRun(port))
 	{
-		if (server->Listen(100))
-		{
-			// success log
-			MessageQueue::GetInstance()->Push(L"Socket Server Open");
-			ServerRunButton.SetWindowTextW(_T("Server Close"));
-			ServerRunButton.EnableWindow(TRUE);
-		}
-		else
-		{
-			// error log
-			int error_code = server->GetLastError();
-
-			server->Close();
-			delete server;
-			server = nullptr;
-
-			ServerRunButton.EnableWindow(TRUE);
-			MessageQueue::GetInstance()->Push(L"Error Code("+ std::to_wstring(error_code) + L")");
-		}
+		// success log
+		MessageQueue::GetInstance()->Push(L"Socket Server Open");
+		ServerRunButton.SetWindowTextW(_T("Server Close"));
+		ServerRunButton.EnableWindow(TRUE);
 	}
 	else
 	{
 		// error log
-		int error_code = server->GetLastError();
-
-		server->Close();
-		delete server;
-		server = nullptr;
-
+		dwView->ServerClose();
 		ServerRunButton.EnableWindow(TRUE);
-		MessageQueue::GetInstance()->Push(L"Error Code(" + std::to_wstring(error_code) + L")");
+		//MessageQueue::GetInstance()->Push(L"Error Code(" + std::to_wstring(error_code) + L")");
 	}
 }
 
 void CComputerNetworkScreenSharingDlg::OnBnClickedServerrun()
 {
-	if (server != nullptr)
+	if (dwView->serverRunning)
 	{
 		ServerRunButton.EnableWindow(FALSE);
 
+		dwView->ServerClose();
+
 		MessageQueue::GetInstance()->Push(L"Socket Server Close");
-
-		server->Close();
-		delete server;
-		server = nullptr;
-
 		ServerRunButton.SetWindowTextW(_T("Server Run"));
 		ServerRunButton.EnableWindow(TRUE);
 	}
@@ -306,9 +278,6 @@ void CComputerNetworkScreenSharingDlg::OnBnClickedServerrun()
 
 void CComputerNetworkScreenSharingDlg::OnClickedConnectbutton()
 {
-	client = new CClientSocket;
-	client->Create();
-	
 	BYTE a, b, c, d;
 	CString ip;
 	ConnectIP.GetAddress(a, b, c, d);
@@ -322,16 +291,14 @@ void CComputerNetworkScreenSharingDlg::OnClickedConnectbutton()
 	str.append(L":");
 	str.append(port);
 
-	dwView->isClient = true;
-	BOOL check = client->Connect(ip, _ttoi(port));
-	if (check)
+	// check dwView is new process or old process
+	if (dwView->ClientRun(ip, _ttoi(port)))
 	{
 		str.append(L" connected");
 		MessageQueue::GetInstance()->Push(str);
 	}
 	else
 	{
-		dwView->isClient = false;
 		str.append(L" fail");
 		MessageQueue::GetInstance()->Push(str);
 	}
@@ -340,57 +307,11 @@ void CComputerNetworkScreenSharingDlg::OnClickedConnectbutton()
 UINT CComputerNetworkScreenSharingDlg::OnLogThread(LPVOID param)
 {
 	CComputerNetworkScreenSharingDlg* dlg = (CComputerNetworkScreenSharingDlg*)param;
-	
-	while (!isClose)
+
+	while (1)
 	{
 		PostMessageA(dlg->m_hWnd, WM_POP, NULL, NULL);
 		Sleep(130);
-	}
-	return 0;
-}
-
-UINT CComputerNetworkScreenSharingDlg::OnServerThread(LPVOID param)
-{
-	CComputerNetworkScreenSharingDlg* dlg = (CComputerNetworkScreenSharingDlg*)param;
-
-	MessageQueue::GetInstance()->Push(L"Server Thread run");
-	while (!isClose)
-	{
-		PostMessageA(dlg->m_hWnd, WM_SENDDRAW, NULL, NULL);
-		Sleep(1);
-	}
-	return 0;
-}
-
-afx_msg LRESULT CComputerNetworkScreenSharingDlg::OnSenddraw(WPARAM wParam, LPARAM lParam)
-{
-	PointData point = DrawingQueue::GetSendQueue()->Pop();
-	if (point.x == -1 || point.y == -1)
-	{
-		return 1;
-	}
-	
-	std::string message_str = point.ToString();
-
-	if (server != nullptr)
-	{
-		server->BroadCast((char*)message_str.c_str(), DATA_SIZE + CLIENT_NAME_SIZE);
-	}
-
-	if (dwView->isClient)
-	{
-		char message[DATA_SIZE] = { 0, };
-		int i = 0;
-		for (i = 0; i != DATA_SIZE; i++)
-		{
-			if (message_str.c_str()[i] == '\0')
-			{
-				message[i] = '\0';
-				break;
-			}
-			message[i] = message_str.c_str()[i];
-		}
-		client->Send(message, DATA_SIZE);
 	}
 	return 0;
 }
@@ -415,19 +336,6 @@ BOOL CComputerNetworkScreenSharingDlg::DestroyWindow()
 	if (server_thread != nullptr)
 	{
 		server_thread = nullptr;
-	}
-
-	if (server != nullptr)
-	{
-		server->Close();
-		delete server;
-		server = nullptr;
-	}
-	if (client != nullptr)
-	{
-		client->Close();
-		delete client;
-		client = nullptr;
 	}
 	if (dwView != nullptr)
 	{

@@ -42,9 +42,6 @@ protected:
 	DECLARE_MESSAGE_MAP()
 
 private:
-	CListenSocket* server;
-	CClientSocket* client;
-
 	DrawingView* dwView;
 	
 	CEdit ServerPort;
@@ -71,11 +68,9 @@ private:
 public:
 	afx_msg void OnBnClickedServerrun();
 	afx_msg void OnClickedConnectbutton();
-	afx_msg LRESULT OnSenddraw(WPARAM wParam, LPARAM lParam);
 
 	// thread function
 	static UINT OnLogThread(LPVOID param);
-	static UINT OnServerThread(LPVOID param);
 };
 
 static BOOL isClose;

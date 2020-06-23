@@ -2,6 +2,9 @@
 
 // DrawingView 폼 보기
 
+#include "CClientSocket.h"
+#include "CListenSocket.h"
+
 #include <iostream>
 #include <concurrent_unordered_map.h>
 typedef Concurrency::concurrent_unordered_map<std::string, CPoint> ClientCPointMap;
@@ -13,7 +16,9 @@ class DrawingView : public CFormView
 private:
 	CPoint point; // draw point
 	ClientCPointMap receivePointes;
-	//CPoint receivePoint;
+
+	CListenSocket* server;
+	CClientSocket* client;
 
 public:
 #ifdef AFX_DESIGN_TIME
@@ -35,6 +40,8 @@ public:
 	virtual ~DrawingView();
 
 	bool isClient;
+	bool serverRunning;
+	bool clientRunning;
 
 	// call protected's CFormView methods
 	virtual BOOL Create(LPCTSTR lpszClassName, LPCTSTR lpszWindowName, DWORD dwStyle, const RECT& rect, CWnd* pParentWnd, UINT nID, CCreateContext* pContext = NULL);
@@ -50,12 +57,17 @@ public:
 
 	// message call
 	afx_msg LRESULT OnDrawpop(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnSenddraw(WPARAM wParam, LPARAM lParam);
 
 	// thread runner
 	static UINT threadReceiveQeueuRunner(LPVOID param);
+	static UINT OnServerThread(LPVOID param);
 
 	// view thread runner call
-	void ClientRun();
+	bool ClientRun(CString ip, UINT port);
+	bool ServerRun(UINT port);
+	bool ServerClose();
+
 
 	// getter, setter
 	void SetName(std::wstring Name) { this->Name = std::wstring(Name.c_str()); };
@@ -64,6 +76,7 @@ public:
 private:
 	std::wstring Name;
 	CWinThread* threadReceiveQueue;
+	CWinThread* threadServer;
 };
 
 

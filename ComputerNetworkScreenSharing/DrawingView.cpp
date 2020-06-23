@@ -22,6 +22,9 @@ DrawingView::DrawingView()
 	this->Name = _T("");
 	isClient = false;
 	threadReceiveQueue = nullptr;
+	threadServer = nullptr;
+	server = nullptr;
+	client = nullptr;
 }
 
 DrawingView::~DrawingView()
@@ -39,6 +42,7 @@ BEGIN_MESSAGE_MAP(DrawingView, CFormView)
 	ON_WM_LBUTTONDOWN()
 	ON_WM_MOUSEMOVE()
 	ON_MESSAGE(WM_DRAWPOP, &DrawingView::OnDrawpop)
+	ON_MESSAGE(WM_SENDDRAW, &DrawingView::OnSenddraw)
 END_MESSAGE_MAP()
 
 
@@ -82,11 +86,31 @@ void DrawingView::OnInitialUpdate()
 
 BOOL DrawingView::DestroyWindow()
 {
+	HANDLE threades[2] = { threadReceiveQueue , threadServer};
+	WaitForMultipleObjects(2, threades, TRUE, 1000);
+
 	if (threadReceiveQueue != nullptr)
 	{
-		//WaitForSingleObject(threadReceiveQueue, 1000);
-		threadReceiveQueue->ExitInstance();
+		//threadReceiveQueue->ExitInstance();
 		threadReceiveQueue = nullptr;
+	}
+
+	if (threadServer != nullptr)
+	{
+		threadServer = nullptr;
+	}
+
+	if (server != nullptr)
+	{
+		server->Close();
+		delete server;
+		server = nullptr;
+	}
+	if (client != nullptr)
+	{
+		client->Close();
+		delete client;
+		client = nullptr;
 	}
 
 	receivePointes.clear();
@@ -267,8 +291,108 @@ UINT DrawingView::threadReceiveQeueuRunner(LPVOID param)
 	return 0;
 }
 
-void DrawingView::ClientRun()
+UINT DrawingView::OnServerThread(LPVOID param)
 {
+	DrawingView* dv = (DrawingView*)param;
+	MessageQueue::GetInstance()->Push(L"Server Thread run");
+	while (1)
+	{
+		PostMessageA(dv->m_hWnd, WM_SENDDRAW, NULL, NULL);
+		Sleep(1);
+	}
+	return 0;
+}
+
+bool DrawingView::ClientRun(CString ip, UINT port)
+{
+	client = new CClientSocket;
+	client->Create();
+
 	isClient = true;
-	MessageQueue::GetInstance()->Push(L"Drawing View Client Run");
+	BOOL check = client->Connect(ip, port);
+	if (check)
+	{
+		return true;
+	}
+	else
+	{
+		isClient = false;
+		return false;
+	}
+}
+
+bool DrawingView::ServerRun(UINT port)
+{
+	server = new CListenSocket;
+	if (server->Create(port, SOCK_STREAM))
+	{
+		if (server->Listen(100))
+		{
+			threadServer = AfxBeginThread(OnServerThread, this);
+			return true;
+		}
+		else
+		{
+			server->Close();
+			delete server;
+			server = nullptr;
+
+			return false;
+		}
+	}
+	else
+	{
+		delete server;
+		server = nullptr;
+		return false;
+	}
+}
+
+bool DrawingView::ServerClose()
+{
+	if (server != nullptr)
+	{
+		server->Close();
+		delete server;
+		server = nullptr;
+		return true;
+	}
+	else
+	{
+		server = nullptr;
+		return false;
+	}
+}
+
+afx_msg LRESULT DrawingView::OnSenddraw(WPARAM wParam, LPARAM lParam)
+{
+	PointData point = DrawingQueue::GetSendQueue()->Pop();
+	if (point.x == -1 || point.y == -1)
+	{
+		return 1;
+	}
+
+	std::string message_str = point.ToString();
+
+	if (server != nullptr)
+	{
+		server->BroadCast((char*)message_str.c_str(), DATA_SIZE + CLIENT_NAME_SIZE);
+	}
+
+	if (this->isClient)
+	{
+		char message[DATA_SIZE] = { 0, };
+		int i = 0;
+		for (i = 0; i != DATA_SIZE; i++)
+		{
+			if (message_str.c_str()[i] == '\0')
+			{
+				message[i] = '\0';
+				break;
+			}
+			message[i] = message_str.c_str()[i];
+		}
+		client->Send(message, DATA_SIZE);
+	}
+	return 0;
 }
