@@ -115,7 +115,7 @@ void DrawingView::OnLButtonDown(UINT nFlags, CPoint point)
 	// push to type is 'click'
 	std::string id = ClientMap::GetClientMap()->GetValue(L"server");
 	DrawingQueue::GetSendQueue()->Push(point, CLICK_DATA, id);
-	//PointDataList::GetQueue()->Insert(id, point, CLICK_DATA, id);
+	PointDataList::GetQueue()->Insert(id, point, CLICK_DATA, id);
 	CFormView::OnLButtonDown(nFlags, point);
 }
 
@@ -131,8 +131,8 @@ void DrawingView::OnMouseMove(UINT nFlags, CPoint point)
 
 		// push to type is 'move'
 		std::string id = ClientMap::GetClientMap()->GetValue(L"server");
-		DrawingQueue::GetSendQueue()->Push(point, CLICK_DATA, id);
-		//PointDataList::GetQueue()->Insert(id, point, CLICK_DATA, id);
+		DrawingQueue::GetSendQueue()->Push(point, MOVE_DATA, id);
+		PointDataList::GetQueue()->Insert(id, point, MOVE_DATA, id);
 
 		if (!isClient)
 		{
@@ -190,7 +190,7 @@ afx_msg LRESULT DrawingView::OnDrawpop(WPARAM wParam, LPARAM lParam)
 
 	// get client id
 	std::string client_id = std::string(point.id);
-	//PointDataList::GetQueue()->Insert(client_id, point);
+	PointDataList::GetQueue()->Insert(client_id, point);
 
 	// new client
 	if (this->receivePointes.find(client_id) == this->receivePointes.end())
