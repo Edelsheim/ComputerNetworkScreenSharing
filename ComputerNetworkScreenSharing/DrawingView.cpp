@@ -85,6 +85,8 @@ BOOL DrawingView::DestroyWindow()
 		threadReceiveQueue = nullptr;
 	}
 
+	receivePointes.clear();
+
 	return CFormView::DestroyWindow();
 }
 

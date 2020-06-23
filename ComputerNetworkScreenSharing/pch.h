@@ -15,7 +15,7 @@
 #define WM_SENDDRAW WM_APP + 3
 
 #define DATA_SIZE 11
-#define CLIENT_NAME_SIZE 12
+#define CLIENT_NAME_SIZE 13
 #define ACCEPT_DATA 'a'
 #define CLICK_DATA 'c'
 #define MOVE_DATA 'm'
