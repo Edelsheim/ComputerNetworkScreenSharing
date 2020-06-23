@@ -5,6 +5,7 @@
 #include "DrawingQueue.h"
 #include "ClientMap.h"
 #include "PointDataList.h"
+#include "ConnectList.h"
 
 CListenSocket::CListenSocket() : CAsyncSocket()
 {
@@ -19,23 +20,21 @@ CListenSocket::CListenSocket() : CAsyncSocket()
 	key.Format(cstring_format, 0);
 	std::string value = CT2CA(key);
 	ClientMap::GetClientMap()->Insert(L"server", value);
+
+	CString serverIP;
+	UINT serverPort = 0;
+	if (GetPeerNameEx(serverIP, serverPort))
+	{
+		std::wstring server_connect_info = serverIP.operator LPCWSTR();
+		server_connect_info.append(L":");
+		server_connect_info.append(std::to_wstring(serverPort));
+		ConnectList::GetConnectList()->Insert(server_connect_info);
+	}
 }
 
 CListenSocket::~CListenSocket()
 {
-	POSITION pos;
-	pos = clientSocketList.GetHeadPosition();
-	CClient* client = nullptr;
 
-	while (pos != NULL)
-	{
-		client = (CClient*)clientSocketList.GetNext(pos);
-		if (client != nullptr)
-		{
-			client->Close();
-		}
-	}
-	clientSocketList.RemoveAll();
 }
 
 void CListenSocket::OnAccept(int nErrorCode)
@@ -156,4 +155,24 @@ void CListenSocket::BroadCast(void* message, int len)
 void CListenSocket::OnReceive(int nErrorCode)
 {
 	CAsyncSocket::OnReceive(nErrorCode);
+}
+
+
+void CListenSocket::OnClose(int nErrorCode)
+{
+	POSITION pos;
+	pos = clientSocketList.GetHeadPosition();
+	CClient* client = nullptr;
+
+	while (pos != NULL)
+	{
+		client = (CClient*)clientSocketList.GetNext(pos);
+		if (client != nullptr)
+		{
+			client->Close();
+		}
+	}
+	clientSocketList.RemoveAll();
+
+	CAsyncSocket::OnClose(nErrorCode);
 }
