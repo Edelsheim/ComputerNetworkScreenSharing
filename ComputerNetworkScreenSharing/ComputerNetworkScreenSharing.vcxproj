@@ -197,6 +197,7 @@
     <ClInclude Include="pch.h" />
     <ClInclude Include="PointData.h" />
     <ClInclude Include="PointDataList.h" />
+    <ClInclude Include="ProcessList.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="targetver.h" />
   </ItemGroup>
