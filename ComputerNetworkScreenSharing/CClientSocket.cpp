@@ -13,19 +13,12 @@ CClientSocket::~CClientSocket()
 {
 }
 
-void CClientSocket::OnConnect(int nErrorCode)
-{
-	CSocket::OnConnect(nErrorCode);
-}
-
-
 void CClientSocket::OnClose(int nErrorCode)
 {
 	ShutDown();
 	Close();
 	CSocket::OnClose(nErrorCode);
 }
-
 
 void CClientSocket::OnReceive(int nErrorCode)
 {
@@ -63,17 +56,4 @@ void CClientSocket::OnReceive(int nErrorCode)
 		DrawingQueue::GetReceiveQueue()->Push(point_data);
 	}
 	CSocket::OnReceive(nErrorCode);
-}
-
-
-void CClientSocket::OnSend(int nErrorCode)
-{
-	CSocket::OnSend(nErrorCode);
-}
-
-
-int CClientSocket::Send(const void* lpBuf, int nBufLen, int nFlags)
-{
-	// TODO: 여기에 특수화된 코드를 추가 및/또는 기본 클래스를 호출합니다.
-	return CSocket::Send(lpBuf, nBufLen, nFlags);
 }

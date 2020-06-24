@@ -17,6 +17,32 @@ public:
 	};
 	~PointData() {};
 
+	void GetData(char* data)
+	{
+		int x_ = x;
+		int y_ = y;
+
+		data[0] = type;
+		data[1] = 'x';
+		data[2] = (int)(x_ / 1000) + '0';
+		x_ = x_ % 1000;
+		data[3] = (int)(x_ / 100) + '0';
+		x_ = x_ % 100;
+		data[4] = (int)(x_ / 10) + '0';
+		data[5] = (int)(x_ % 10) + '0';
+
+		data[6] = 'y';
+		data[7] = (int)(y_ / 1000) + '0';
+		y_ = y_ % 1000;
+		data[8] = (int)(y_ / 100) + '0';
+		y_ = y_ % 100;;
+		data[9] = (int)(y_ / 10) + '0';
+		data[10] = (int)(y_ % 10) + '0';
+
+		for (int i = 0; i != CLIENT_NAME_SIZE; i++)
+			data[11 + i] = id[i];
+	}
+
 	std::string ToString()
 	{
 		std::string result = "";

@@ -79,9 +79,10 @@ void CClient::OnReceive(int nErrorCode)
 		PointData point_data;
 		point_data.type = type;
 
+		const char* client_value_ch = client_value.c_str();
 		int i = 0;
 		for (i = 0; i != CLIENT_NAME_SIZE - 1; i++)
-			point_data.id[i] = client_value.c_str()[i];
+			point_data.id[i] = client_value_ch[i];
 		point_data.id[i] = '\0';
 		point_data.x = point_x;
 		point_data.y = point_y;
@@ -89,17 +90,4 @@ void CClient::OnReceive(int nErrorCode)
 		DrawingQueue::GetReceiveQueue()->Push(point_data);
 	}
 	CSocket::OnReceive(nErrorCode);
-}
-
-
-void CClient::OnSend(int nErrorCode)
-{
-	CSocket::OnSend(nErrorCode);
-}
-
-
-int CClient::Send(const void* lpBuf, int nBufLen, int nFlags)
-{
-	// TODO: 여기에 특수화된 코드를 추가 및/또는 기본 클래스를 호출합니다.
-	return CSocket::Send(lpBuf, nBufLen, nFlags);
 }

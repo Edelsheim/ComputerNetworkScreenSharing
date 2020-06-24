@@ -62,8 +62,6 @@ CComputerNetworkScreenSharingDlg::CComputerNetworkScreenSharingDlg(CWnd* pParent
 
 	isClose = false;
 	log_thread = nullptr;
-	client_thread = nullptr;
-	server_thread = nullptr;
 }
 
 void CComputerNetworkScreenSharingDlg::DoDataExchange(CDataExchange* pDX)
@@ -325,8 +323,8 @@ UINT CComputerNetworkScreenSharingDlg::OnLogThread(LPVOID param)
 
 	while (1)
 	{
-		PostMessageA(dlg->m_hWnd, WM_POP, NULL, NULL);
-		Sleep(130);
+		PostMessageA(dlg->GetSafeHwnd(), WM_POP, NULL, NULL);
+		Sleep(200);
 	}
 	return 0;
 }
@@ -337,21 +335,12 @@ BOOL CComputerNetworkScreenSharingDlg::DestroyWindow()
 	// TODO: 여기에 특수화된 코드를 추가 및/또는 기본 클래스를 호출합니다.
 	isClose = true;
 
-	HANDLE threades[3] = { log_thread, client_thread, server_thread };
-	WaitForMultipleObjects(3, threades, TRUE, 500);
-
 	if (log_thread != nullptr)
 	{
+		log_thread->ExitInstance();
 		log_thread = nullptr;
 	}
-	if (client_thread != nullptr)
-	{
-		client_thread = nullptr;
-	}
-	if (server_thread != nullptr)
-	{
-		server_thread = nullptr;
-	}
+
 	if (dwView != nullptr)
 	{
 		dwView->DestroyWindow();

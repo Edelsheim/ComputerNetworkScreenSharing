@@ -58,8 +58,6 @@ private:
 
 	// thread
 	CWinThread* log_thread;
-	CWinThread* client_thread;
-	CWinThread* server_thread;
 
 	// list process
 	// Drawing View

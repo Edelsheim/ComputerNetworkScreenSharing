@@ -39,7 +39,6 @@ void CListenSocket::OnAccept(int nErrorCode)
 	}
 	else
 	{
-		MessageQueue::GetInstance()->Push(L"Accept new client index : " + std::to_wstring(PlayerIndex));
 		//
 		// On accept new client, add to client map(client list)
 		//
@@ -90,8 +89,9 @@ void CListenSocket::OnAccept(int nErrorCode)
 					break;
 
 				PointData data = (*data_iterator);
-				std::string message = data.ToString();
-				client->Send(message.c_str(), DATA_SIZE + CLIENT_NAME_SIZE);
+				char message[DATA_SIZE + CLIENT_NAME_SIZE] = { 0, };
+				data.GetData(message);
+				client->Send(message, DATA_SIZE + CLIENT_NAME_SIZE);
 				
 				data_iterator++;
 			}
@@ -140,12 +140,6 @@ void CListenSocket::BroadCast(void* message, int len)
 		}
 	}
 }
-
-void CListenSocket::OnReceive(int nErrorCode)
-{
-	CAsyncSocket::OnReceive(nErrorCode);
-}
-
 
 void CListenSocket::OnClose(int nErrorCode)
 {
