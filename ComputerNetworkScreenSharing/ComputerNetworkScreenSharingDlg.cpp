@@ -14,6 +14,7 @@
 
 #include "MessageQueue.h"
 #include "DrawingQueue.h"
+#include "ConnectList.h"
 
 // 응용 프로그램 정보에 사용되는 CAboutDlg 대화 상자입니다.
 
@@ -291,15 +292,29 @@ void CComputerNetworkScreenSharingDlg::OnClickedConnectbutton()
 	str.append(L":");
 	str.append(port);
 
-	// check dwView is new process or old process
-	if (dwView->ClientRun(ip, _ttoi(port)))
+	std::wstring connect_info = ip;
+	connect_info.append(L":");
+	connect_info.append(port);
+	
+	// insert return to true, insert done
+	if (ConnectList::GetConnectList()->Insert(connect_info))
 	{
-		str.append(L" connected");
-		MessageQueue::GetInstance()->Push(str);
+		// check dwView is new process or old process
+		if (dwView->ClientRun(ip, _ttoi(port)))
+		{
+			str.append(L" connected");
+			MessageQueue::GetInstance()->Push(str);
+		}
+		else
+		{
+			str.append(L" fail");
+			MessageQueue::GetInstance()->Push(str);
+		}
 	}
 	else
 	{
-		str.append(L" fail");
+		// connect same process
+		str.append(L" have connected before");
 		MessageQueue::GetInstance()->Push(str);
 	}
 }
