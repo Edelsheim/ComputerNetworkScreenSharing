@@ -94,7 +94,6 @@ BOOL DrawingView::DestroyWindow()
 
 	if (threadReceiveQueue != nullptr)
 	{
-		//threadReceiveQueue->ExitInstance();
 		threadReceiveQueue = nullptr;
 	}
 
@@ -107,14 +106,18 @@ BOOL DrawingView::DestroyWindow()
 	{
 		server->Close();
 		delete server;
-		server = nullptr;
 	}
+	serverRunning = false;
+	server = nullptr;
+
 	if (client != nullptr)
 	{
 		client->Close();
 		delete client;
 		client = nullptr;
 	}
+	clientRunning = false;
+	client = nullptr;
 
 	receivePointes.clear();
 
@@ -132,26 +135,24 @@ HBRUSH DrawingView::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
 void DrawingView::OnLButtonDown(UINT nFlags, CPoint point)
 {
 	CClientDC dc(this);
-
-	if (server != nullptr && serverRunning)
+	std::string id = "";
+	if (server != nullptr)
 	{
 		dc.MoveTo(point.x, point.y);
 		this->point.x = point.x;
 		this->point.y = point.y;
-	}
 
-	// push to type is 'click'
-
-	std::string id;
-	if (server != nullptr && serverRunning)
-	{
+		// push to type is 'click'
 		id = ClientMap::GetClientMap()->GetValue(L"server");
+		DrawingQueue::GetSendQueue()->Push(point, CLICK_DATA, id);
 		PointDataList::GetQueue()->Insert(this->Name, point, CLICK_DATA, id);
 	}
-	else
-		id = "";
+	else if (client != nullptr)
+	{
+		DrawingQueue::GetSendQueue()->Push(point, CLICK_DATA, "");
+		PointDataList::GetQueue()->Insert(this->Name, point, CLICK_DATA, "");
+	}
 
-	DrawingQueue::GetSendQueue()->Push(point, CLICK_DATA, id);
 	CFormView::OnLButtonDown(nFlags, point);
 }
 
@@ -166,20 +167,12 @@ void DrawingView::OnMouseMove(UINT nFlags, CPoint point)
 		GetClientRect(&my_rect);
 
 		// push to type is 'move'
-		std::string id;
-		if (server != nullptr && serverRunning)
-		{
-			id = ClientMap::GetClientMap()->GetValue(L"server");
-			PointDataList::GetQueue()->Insert(this->Name, point, MOVE_DATA, id);
-		}
-		else
-			id = "";
 
-		DrawingQueue::GetSendQueue()->Push(point, MOVE_DATA, id);
-		PointDataList::GetQueue()->Insert(this->Name, point, MOVE_DATA, id);
-
-		if (server != nullptr && serverRunning)
+		if (server != nullptr)
 		{
+			std::string id = ClientMap::GetClientMap()->GetValue(L"server");
+			DrawingQueue::GetSendQueue()->Push(point, MOVE_DATA, id);
+
 			if (point.x <= my_rect.left + 3)
 			{
 				dc.MoveTo(my_rect.left, point.y);
@@ -215,6 +208,13 @@ void DrawingView::OnMouseMove(UINT nFlags, CPoint point)
 				this->point.x = point.x;
 				this->point.y = point.y;
 			}
+
+			PointDataList::GetQueue()->Insert(this->Name, point, MOVE_DATA, id);
+		}
+		else if (client != nullptr)
+		{
+			DrawingQueue::GetSendQueue()->Push(point, MOVE_DATA, "");
+			PointDataList::GetQueue()->Insert(this->Name, point, MOVE_DATA, "");
 		}
 	}
 	CFormView::OnMouseMove(nFlags, point);
@@ -234,7 +234,6 @@ afx_msg LRESULT DrawingView::OnDrawpop(WPARAM wParam, LPARAM lParam)
 
 	// get client id
 	std::string client_id = std::string(point.id);
-	PointDataList::GetQueue()->Insert(this->Name, point);
 
 	// new client
 	if (this->receivePointes.find(client_id) == this->receivePointes.end())
@@ -244,12 +243,6 @@ afx_msg LRESULT DrawingView::OnDrawpop(WPARAM wParam, LPARAM lParam)
 		data.y = point.y;
 		this->receivePointes.insert(std::make_pair(client_id, data));
 	}
-
-	if (server != nullptr && serverRunning)
-	{
-		DrawingQueue::GetSendQueue()->Push(point);
-	}
-
 
 	if (point.type == 'c') // check type is 'click'
 	{
@@ -295,8 +288,45 @@ afx_msg LRESULT DrawingView::OnDrawpop(WPARAM wParam, LPARAM lParam)
 		this->receivePointes.at(client_id).x = point.x;
 		this->receivePointes.at(client_id).y = point.y;
 	}
+
+	if (server != nullptr)
+	{
+		DrawingQueue::GetSendQueue()->Push(point);
+		PointDataList::GetQueue()->Insert(this->Name, point);
+	}
 	return 0;
 }
+
+afx_msg LRESULT DrawingView::OnSenddraw(WPARAM wParam, LPARAM lParam)
+{
+	if (server != nullptr && client != nullptr)
+		return 1;
+
+	PointData point = DrawingQueue::GetSendQueue()->Pop();
+	if (point.x == -1 || point.y == -1)
+	{
+		return 1;
+	}
+
+	char send_message[DATA_SIZE + CLIENT_NAME_SIZE];
+	point.GetData(send_message);
+	if (server != nullptr)
+	{
+		server->BroadCast(send_message, DATA_SIZE + CLIENT_NAME_SIZE);
+	}
+	else if (client != nullptr)
+	{
+		char message[DATA_SIZE] = { 0, };
+		int i = 0;
+		for (i = 0; i != DATA_SIZE; i++)
+		{
+			message[i] = send_message[i];
+		}
+		client->Send(message, DATA_SIZE);
+	}
+	return 0;
+}
+
 
 UINT DrawingView::threadReceiveQeueuRunner(LPVOID param)
 {
@@ -304,7 +334,8 @@ UINT DrawingView::threadReceiveQeueuRunner(LPVOID param)
 	MessageQueue::GetInstance()->Push(L"Thread Receive Queue Runner");
 	while (1)
 	{
-		PostMessageA(thisView->GetSafeHwnd(), WM_DRAWPOP, NULL, NULL);
+		PostMessageA(thisView->m_hWnd, WM_DRAWPOP, NULL, NULL);
+		//thisView->OnDrawpop(NULL, NULL);
 		Sleep(1);
 	}
 	return 0;
@@ -317,6 +348,7 @@ UINT DrawingView::threadSendQueueRunner(LPVOID param)
 	while (1)
 	{
 		PostMessageA(dv->m_hWnd, WM_SENDDRAW, NULL, NULL);
+		//dv->OnSenddraw(NULL, NULL);
 		Sleep(1);
 	}
 	return 0;
@@ -361,7 +393,7 @@ bool DrawingView::ServerRun(UINT port)
 		server = new CListenSocket;
 		if (server->Create(port, SOCK_STREAM))
 		{
-			if (server->Listen(100))
+			if (server->Listen(5))
 			{
 				serverRunning = true;
 				return true;
@@ -404,37 +436,4 @@ bool DrawingView::ServerClose()
 
 	serverRunning = false;
 	return true;
-}
-
-afx_msg LRESULT DrawingView::OnSenddraw(WPARAM wParam, LPARAM lParam)
-{
-	PointData point = DrawingQueue::GetSendQueue()->Pop();
-	if (point.x == -1 || point.y == -1)
-	{
-		return 1;
-	}
-
-	std::string message_str = point.ToString();
-
-	if (server != nullptr && serverRunning)
-	{
-		server->BroadCast((char*)message_str.c_str(), DATA_SIZE + CLIENT_NAME_SIZE);
-	}
-
-	if (clientRunning)
-	{
-		char message[DATA_SIZE] = { 0, };
-		int i = 0;
-		for (i = 0; i != DATA_SIZE; i++)
-		{
-			if (message_str.c_str()[i] == '\0')
-			{
-				message[i] = '\0';
-				break;
-			}
-			message[i] = message_str.c_str()[i];
-		}
-		client->Send(message, DATA_SIZE);
-	}
-	return 0;
 }
