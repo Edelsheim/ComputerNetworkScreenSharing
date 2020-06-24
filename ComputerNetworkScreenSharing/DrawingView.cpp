@@ -21,8 +21,10 @@ DrawingView::DrawingView()
 	this->point.y = -1;
 	this->Name = _T("");
 	isClient = false;
+	serverRunning = false;
+	clientRunning = false;
 	threadReceiveQueue = nullptr;
-	threadServer = nullptr;
+	threadSendQueue = nullptr;
 	server = nullptr;
 	client = nullptr;
 }
@@ -82,11 +84,12 @@ void DrawingView::OnInitialUpdate()
 	this->point.y = -1;
 
 	threadReceiveQueue = AfxBeginThread(threadReceiveQeueuRunner, this);
+	threadSendQueue = AfxBeginThread(threadSendQueueRunner, this);
 }
 
 BOOL DrawingView::DestroyWindow()
 {
-	HANDLE threades[2] = { threadReceiveQueue , threadServer};
+	HANDLE threades[2] = { threadReceiveQueue , threadSendQueue};
 	WaitForMultipleObjects(2, threades, TRUE, 1000);
 
 	if (threadReceiveQueue != nullptr)
@@ -95,9 +98,9 @@ BOOL DrawingView::DestroyWindow()
 		threadReceiveQueue = nullptr;
 	}
 
-	if (threadServer != nullptr)
+	if (threadSendQueue != nullptr)
 	{
-		threadServer = nullptr;
+		threadSendQueue = nullptr;
 	}
 
 	if (server != nullptr)
@@ -130,7 +133,7 @@ void DrawingView::OnLButtonDown(UINT nFlags, CPoint point)
 {
 	CClientDC dc(this);
 
-	if (!isClient)
+	if (server != nullptr && serverRunning)
 	{
 		dc.MoveTo(point.x, point.y);
 		this->point.x = point.x;
@@ -138,7 +141,13 @@ void DrawingView::OnLButtonDown(UINT nFlags, CPoint point)
 	}
 
 	// push to type is 'click'
-	std::string id = ClientMap::GetClientMap()->GetValue(L"server");
+
+	std::string id;
+	if (server != nullptr && serverRunning)
+		id = ClientMap::GetClientMap()->GetValue(L"server");
+	else
+		id = "";
+
 	DrawingQueue::GetSendQueue()->Push(point, CLICK_DATA, id);
 	PointDataList::GetQueue()->Insert(this->Name, point, CLICK_DATA, id);
 	CFormView::OnLButtonDown(nFlags, point);
@@ -155,11 +164,16 @@ void DrawingView::OnMouseMove(UINT nFlags, CPoint point)
 		GetClientRect(&my_rect);
 
 		// push to type is 'move'
-		std::string id = ClientMap::GetClientMap()->GetValue(L"server");
+		std::string id;
+		if (server != nullptr && serverRunning)
+			id = ClientMap::GetClientMap()->GetValue(L"server");
+		else
+			id = "";
+
 		DrawingQueue::GetSendQueue()->Push(point, MOVE_DATA, id);
 		PointDataList::GetQueue()->Insert(this->Name, point, MOVE_DATA, id);
 
-		if (!isClient)
+		if (server != nullptr && serverRunning)
 		{
 			if (point.x <= my_rect.left + 3)
 			{
@@ -271,7 +285,7 @@ afx_msg LRESULT DrawingView::OnDrawpop(WPARAM wParam, LPARAM lParam)
 		this->receivePointes.at(client_id).y = point.y;
 	}
 
-	if (!isClient)
+	if (server != nullptr && serverRunning)
 	{
 		DrawingQueue::GetSendQueue()->Push(point);
 	}
@@ -291,10 +305,10 @@ UINT DrawingView::threadReceiveQeueuRunner(LPVOID param)
 	return 0;
 }
 
-UINT DrawingView::OnServerThread(LPVOID param)
+UINT DrawingView::threadSendQueueRunner(LPVOID param)
 {
 	DrawingView* dv = (DrawingView*)param;
-	MessageQueue::GetInstance()->Push(L"Server Thread run");
+	MessageQueue::GetInstance()->Push(L"Thread Send Queue Runner");
 	while (1)
 	{
 		PostMessageA(dv->m_hWnd, WM_SENDDRAW, NULL, NULL);
@@ -305,30 +319,45 @@ UINT DrawingView::OnServerThread(LPVOID param)
 
 bool DrawingView::ClientRun(CString ip, UINT port)
 {
+	if (server != nullptr && serverRunning)
+	{
+		clientRunning = false;
+		return false;
+	}
+
 	client = new CClientSocket;
 	client->Create();
 
-	isClient = true;
 	BOOL check = client->Connect(ip, port);
 	if (check)
 	{
+		clientRunning = true;
 		return true;
 	}
 	else
 	{
-		isClient = false;
+		clientRunning = false;
+		delete client;
+		client = nullptr;
 		return false;
 	}
 }
 
 bool DrawingView::ServerRun(UINT port)
 {
+	if (client != nullptr && clientRunning)
+	{
+		serverRunning = false;
+		return false;
+	}
+
+
 	server = new CListenSocket;
 	if (server->Create(port, SOCK_STREAM))
 	{
 		if (server->Listen(100))
 		{
-			threadServer = AfxBeginThread(OnServerThread, this);
+			serverRunning = true;
 			return true;
 		}
 		else
@@ -336,7 +365,7 @@ bool DrawingView::ServerRun(UINT port)
 			server->Close();
 			delete server;
 			server = nullptr;
-
+			serverRunning = false;
 			return false;
 		}
 	}
@@ -344,6 +373,7 @@ bool DrawingView::ServerRun(UINT port)
 	{
 		delete server;
 		server = nullptr;
+		serverRunning = false;
 		return false;
 	}
 }
@@ -360,7 +390,7 @@ bool DrawingView::ServerClose()
 	else
 	{
 		server = nullptr;
-		return false;
+		return true;
 	}
 }
 
@@ -374,12 +404,12 @@ afx_msg LRESULT DrawingView::OnSenddraw(WPARAM wParam, LPARAM lParam)
 
 	std::string message_str = point.ToString();
 
-	if (server != nullptr)
+	if (server != nullptr && serverRunning)
 	{
 		server->BroadCast((char*)message_str.c_str(), DATA_SIZE + CLIENT_NAME_SIZE);
 	}
 
-	if (this->isClient)
+	if (clientRunning)
 	{
 		char message[DATA_SIZE] = { 0, };
 		int i = 0;

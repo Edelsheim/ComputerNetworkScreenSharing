@@ -61,7 +61,7 @@ public:
 
 	// thread runner
 	static UINT threadReceiveQeueuRunner(LPVOID param);
-	static UINT OnServerThread(LPVOID param);
+	static UINT threadSendQueueRunner(LPVOID param);
 
 	// view thread runner call
 	bool ClientRun(CString ip, UINT port);
@@ -76,7 +76,7 @@ public:
 private:
 	std::wstring Name;
 	CWinThread* threadReceiveQueue;
-	CWinThread* threadServer;
+	CWinThread* threadSendQueue;
 };
 
 
