@@ -5,7 +5,6 @@
 #include "DrawingQueue.h"
 #include "ClientMap.h"
 #include "PointDataList.h"
-#include "ConnectList.h"
 
 CListenSocket::CListenSocket() : CAsyncSocket()
 {
@@ -20,16 +19,6 @@ CListenSocket::CListenSocket() : CAsyncSocket()
 	key.Format(cstring_format, 0);
 	std::string value = CT2CA(key);
 	ClientMap::GetClientMap()->Insert(L"server", value);
-
-	CString serverIP;
-	UINT serverPort = 0;
-	if (GetPeerNameEx(serverIP, serverPort))
-	{
-		std::wstring server_connect_info = serverIP.operator LPCWSTR();
-		server_connect_info.append(L":");
-		server_connect_info.append(std::to_wstring(serverPort));
-		ConnectList::GetConnectList()->Insert(server_connect_info);
-	}
 }
 
 CListenSocket::~CListenSocket()

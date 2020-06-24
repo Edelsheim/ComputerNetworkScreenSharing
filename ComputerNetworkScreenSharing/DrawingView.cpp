@@ -144,12 +144,14 @@ void DrawingView::OnLButtonDown(UINT nFlags, CPoint point)
 
 	std::string id;
 	if (server != nullptr && serverRunning)
+	{
 		id = ClientMap::GetClientMap()->GetValue(L"server");
+		PointDataList::GetQueue()->Insert(this->Name, point, CLICK_DATA, id);
+	}
 	else
 		id = "";
 
 	DrawingQueue::GetSendQueue()->Push(point, CLICK_DATA, id);
-	PointDataList::GetQueue()->Insert(this->Name, point, CLICK_DATA, id);
 	CFormView::OnLButtonDown(nFlags, point);
 }
 
@@ -166,7 +168,10 @@ void DrawingView::OnMouseMove(UINT nFlags, CPoint point)
 		// push to type is 'move'
 		std::string id;
 		if (server != nullptr && serverRunning)
+		{
 			id = ClientMap::GetClientMap()->GetValue(L"server");
+			PointDataList::GetQueue()->Insert(this->Name, point, MOVE_DATA, id);
+		}
 		else
 			id = "";
 
@@ -351,18 +356,27 @@ bool DrawingView::ServerRun(UINT port)
 		return false;
 	}
 
-
-	server = new CListenSocket;
-	if (server->Create(port, SOCK_STREAM))
+	if (server == nullptr)
 	{
-		if (server->Listen(100))
+		server = new CListenSocket;
+		if (server->Create(port, SOCK_STREAM))
 		{
-			serverRunning = true;
-			return true;
+			if (server->Listen(100))
+			{
+				serverRunning = true;
+				return true;
+			}
+			else
+			{
+				server->Close();
+				delete server;
+				server = nullptr;
+				serverRunning = false;
+				return false;
+			}
 		}
 		else
 		{
-			server->Close();
 			delete server;
 			server = nullptr;
 			serverRunning = false;
@@ -371,9 +385,6 @@ bool DrawingView::ServerRun(UINT port)
 	}
 	else
 	{
-		delete server;
-		server = nullptr;
-		serverRunning = false;
 		return false;
 	}
 }
@@ -385,13 +396,14 @@ bool DrawingView::ServerClose()
 		server->Close();
 		delete server;
 		server = nullptr;
-		return true;
 	}
 	else
 	{
 		server = nullptr;
-		return true;
 	}
+
+	serverRunning = false;
+	return true;
 }
 
 afx_msg LRESULT DrawingView::OnSenddraw(WPARAM wParam, LPARAM lParam)
