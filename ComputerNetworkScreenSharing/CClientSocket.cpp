@@ -22,13 +22,6 @@ void CClientSocket::OnClose(int nErrorCode)
 
 void CClientSocket::OnReceive(int nErrorCode)
 {
-	/*
-	CString peerIP = _T("");
-	UINT peerPort = 0;
-
-	GetPeerName(peerIP, peerPort);
-	*/
-
 	char data[DATA_SIZE + CLIENT_NAME_SIZE] = { 0, };
 	int len = 0;
 

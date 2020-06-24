@@ -39,8 +39,6 @@ void CClient::OnReceive(int nErrorCode)
 	peer_info.append(L":");
 	peer_info.append(std::to_wstring(peerPort));
 
-	//MessageQueue::GetInstance()->Push(L"Client on receive " + peer_info);
-
 	// get client value (player index)
 	std::string client_value = ClientMap::GetClientMap()->GetValue(peer_info);
 	if (client_value.compare("") == 0)

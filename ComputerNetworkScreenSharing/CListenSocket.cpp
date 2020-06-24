@@ -119,7 +119,6 @@ void CListenSocket::CloseClientSocket(CSocket* client)
 	delete client;
 }
 
-#include <string>
 void CListenSocket::BroadCast(void* message, int len)
 {
 	if (clientSocketList.GetCount() == 0)
