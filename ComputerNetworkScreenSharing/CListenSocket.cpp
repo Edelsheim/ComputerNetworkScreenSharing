@@ -99,7 +99,6 @@ void CListenSocket::OnAccept(int nErrorCode)
 			data_info_iterator++;
 		}
 		MessageQueue::GetInstance()->Push(L"Accept new client synchronization done");
-		
 	}
 }
 

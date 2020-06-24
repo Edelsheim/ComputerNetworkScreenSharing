@@ -136,12 +136,13 @@ void DrawingView::OnLButtonDown(UINT nFlags, CPoint point)
 {
 	CClientDC dc(this);
 	std::string id = "";
+
 	if (server != nullptr)
 	{
 		dc.MoveTo(point.x, point.y);
 		this->point.x = point.x;
 		this->point.y = point.y;
-
+		
 		// push to type is 'click'
 		id = ClientMap::GetClientMap()->GetValue(L"server");
 		DrawingQueue::GetSendQueue()->Push(point, CLICK_DATA, id);
@@ -167,7 +168,6 @@ void DrawingView::OnMouseMove(UINT nFlags, CPoint point)
 		GetClientRect(&my_rect);
 
 		// push to type is 'move'
-
 		if (server != nullptr)
 		{
 			std::string id = ClientMap::GetClientMap()->GetValue(L"server");
@@ -214,7 +214,6 @@ void DrawingView::OnMouseMove(UINT nFlags, CPoint point)
 		else if (client != nullptr)
 		{
 			DrawingQueue::GetSendQueue()->Push(point, MOVE_DATA, "");
-			PointDataList::GetQueue()->Insert(this->Name, point, MOVE_DATA, "");
 		}
 	}
 	CFormView::OnMouseMove(nFlags, point);
