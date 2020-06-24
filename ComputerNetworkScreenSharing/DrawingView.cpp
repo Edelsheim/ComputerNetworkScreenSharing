@@ -245,6 +245,12 @@ afx_msg LRESULT DrawingView::OnDrawpop(WPARAM wParam, LPARAM lParam)
 		this->receivePointes.insert(std::make_pair(client_id, data));
 	}
 
+	if (server != nullptr && serverRunning)
+	{
+		DrawingQueue::GetSendQueue()->Push(point);
+	}
+
+
 	if (point.type == 'c') // check type is 'click'
 	{
 		dc.MoveTo(point.x, point.y);
@@ -289,12 +295,6 @@ afx_msg LRESULT DrawingView::OnDrawpop(WPARAM wParam, LPARAM lParam)
 		this->receivePointes.at(client_id).x = point.x;
 		this->receivePointes.at(client_id).y = point.y;
 	}
-
-	if (server != nullptr && serverRunning)
-	{
-		DrawingQueue::GetSendQueue()->Push(point);
-	}
-
 	return 0;
 }
 
@@ -304,7 +304,7 @@ UINT DrawingView::threadReceiveQeueuRunner(LPVOID param)
 	MessageQueue::GetInstance()->Push(L"Thread Receive Queue Runner");
 	while (1)
 	{
-		PostMessageA(thisView->m_hWnd, WM_DRAWPOP, NULL, NULL);
+		PostMessageA(thisView->GetSafeHwnd(), WM_DRAWPOP, NULL, NULL);
 		Sleep(1);
 	}
 	return 0;
