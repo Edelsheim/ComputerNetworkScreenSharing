@@ -34,7 +34,7 @@ void CListenSocket::OnAccept(int nErrorCode)
 	if (check == FALSE)
 	{
 		delete client;
-		MessageQueue::GetInstance()->Push(L"Accept new client fail");
+		MessageQueue::GetInstance()->Push(L"새로운 사용자와의 연결이 실패했습니다.");
 		return;
 	}
 	else
@@ -66,7 +66,7 @@ void CListenSocket::OnAccept(int nErrorCode)
 		
 		// insert to client map(client list)
 		ClientMap::GetClientMap()->Insert(key, value_str);
-		MessageQueue::GetInstance()->Push(L"Accept new client info : " + key);
+		MessageQueue::GetInstance()->Push(L"새로운 사용자와 연결되었습니다 : " + key);
 		
 		client->SetListenSocket(this); // set client's follw this socket
 		clientSocketList.AddTail(client); // add to client list
@@ -98,7 +98,7 @@ void CListenSocket::OnAccept(int nErrorCode)
 
 			data_info_iterator++;
 		}
-		MessageQueue::GetInstance()->Push(L"Accept new client synchronization done");
+		MessageQueue::GetInstance()->Push(L"새로운 사용자와 데이터 연동이 완료되었습니다.");
 	}
 }
 

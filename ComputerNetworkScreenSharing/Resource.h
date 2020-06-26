@@ -18,6 +18,18 @@
 #define IDC_ConnectPort                 1007
 #define IDC_ConnectButton               1008
 #define IDC_LogList                     1009
+#define IDC_ProcessGroupBox             1013
+#define IDC_MyServer                    1014
+#define IDC_Process2                    1016
+#define ID_Process1                     1017
+#define IDC_Process3                    1029
+#define IDC_Process4                    1030
+#define IDC_Process5                    1031
+#define IDC_Process6                    1032
+#define IDC_Process7                    1033
+#define IDC_Process8                    1034
+#define IDC_Process9                    1035
+#define IDC_Process10                   1036
 
 // Next default values for new objects
 // 
@@ -25,7 +37,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        137
 #define _APS_NEXT_COMMAND_VALUE         32771
-#define _APS_NEXT_CONTROL_VALUE         1010
+#define _APS_NEXT_CONTROL_VALUE         1018
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif
