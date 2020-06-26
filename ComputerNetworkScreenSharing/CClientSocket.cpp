@@ -2,7 +2,6 @@
 #include "CClientSocket.h"
 
 #include "DrawingQueue.h"
-#include "MessageQueue.h"
 #include <string>
 
 CClientSocket::CClientSocket() : CSocket()

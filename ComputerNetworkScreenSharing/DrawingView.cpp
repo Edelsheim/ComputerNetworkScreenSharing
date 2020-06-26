@@ -334,7 +334,6 @@ UINT DrawingView::threadReceiveQeueuRunner(LPVOID param)
 	while (1)
 	{
 		PostMessageA(thisView->m_hWnd, WM_DRAWPOP, NULL, NULL);
-		//thisView->OnDrawpop(NULL, NULL);
 		Sleep(1);
 	}
 	return 0;
@@ -347,7 +346,6 @@ UINT DrawingView::threadSendQueueRunner(LPVOID param)
 	while (1)
 	{
 		PostMessageA(dv->m_hWnd, WM_SENDDRAW, NULL, NULL);
-		//dv->OnSenddraw(NULL, NULL);
 		Sleep(1);
 	}
 	return 0;

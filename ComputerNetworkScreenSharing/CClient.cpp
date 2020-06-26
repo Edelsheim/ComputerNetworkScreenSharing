@@ -2,7 +2,6 @@
 #include "CClient.h"
 #include "CListenSocket.h"
 
-#include "MessageQueue.h"
 #include "DrawingQueue.h"
 #include "ClientMap.h"
 
