@@ -71,29 +71,9 @@ public:
 	// thread function
 	static UINT OnLogThread(LPVOID param);
 
-	afx_msg void OnBnClickedMyServer();
-	afx_msg void OnBnClickedProcess1();
-	afx_msg void OnBnClickedProcess2();
-	afx_msg void OnBnClickedProcess3();
-	afx_msg void OnBnClickedProcess4();
-	afx_msg void OnBnClickedProcess5();
-	afx_msg void OnBnClickedProcess6();
-	afx_msg void OnBnClickedProcess7();
-	afx_msg void OnBnClickedProcess8();
-	afx_msg void OnBnClickedProcess9();
-	afx_msg void OnBnClickedProcess10();
 private:
-	CButton ButtonMyServer;
-	CButton ButtonProcess1;
-	CButton ButtonProcess2;
-	CButton ButtonProcess3;
-	CButton ButtonProcess4;
-	CButton ButtonProcess5;
-	CButton ButtonProcess6;
-	CButton ButtonProcess7;
-	CButton ButtonProcess8;
-	CButton ButtonProcess9;
-	CButton ButtonProcess10;
+	std::wstring ProcessName[MAX_PROCESS];
+	bool ProcessActive[MAX_PROCESS];
 };
 
 static BOOL isClose;

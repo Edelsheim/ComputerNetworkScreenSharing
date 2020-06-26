@@ -20,6 +20,6 @@
 #define CLICK_DATA 'c'
 #define MOVE_DATA 'm'
 
-#define MAX_PROCESS 10
+#define MAX_PROCESS 11
 
 #endif //PCH_H
