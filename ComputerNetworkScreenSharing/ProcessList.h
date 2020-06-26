@@ -4,7 +4,7 @@
 #include <concurrent_unordered_map.h>
 #include "DrawingView.h"
 
-typedef Concurrency::concurrent_unordered_map<std::wstring, DrawingView> ProcessSet;
+typedef Concurrency::concurrent_unordered_map<std::wstring, DrawingView*> ProcessMap;
 
 class ProcessList
 {
@@ -12,7 +12,7 @@ private:
 	ProcessList() {};
 	~ProcessList() {};
 	
-	ProcessSet processSet;
+	ProcessMap processMap;
 public:
 	static ProcessList* GetProcessList()
 	{
@@ -20,14 +20,47 @@ public:
 		return &pl;
 	}
 
-	void Insert(std::wstring processName, DrawingView dv)
+	bool Insert(std::wstring processName, DrawingView* dv)
 	{
-		processSet.insert(dv);
+		if (processMap.find(processName) == processMap.end())
+		{
+			processMap.insert(std::make_pair(processName, dv));
+			return true;
+		}
+		else
+		{
+			return false;
+		}
 	}
 
-	const DrawingView At(std::wstring processName)
+	const DrawingView* At(std::wstring processName)
 	{
-		return processSet.at(processName);
+		if (processMap.find(processName) == processMap.end())
+			return nullptr;
+		else
+			return processMap.at(processName);
+	}
+
+	void Remove(std::wstring processName)
+	{
+		processMap.at(processName);
+	}
+
+	void RemoveAll()
+	{
+		ProcessMap::iterator iterator = processMap.begin();
+		while (1)
+		{
+			if (iterator == processMap.end())
+				break;
+
+			delete iterator->second;
+			iterator->second = nullptr;
+
+			iterator++;
+		}
+
+		processMap.clear();
 	}
 };
 

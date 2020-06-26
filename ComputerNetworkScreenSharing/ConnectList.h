@@ -1,9 +1,9 @@
 #pragma once
 
 #include <iostream>
-#include <concurrent_unordered_set.h>
+#include <concurrent_unordered_map.h>
 
-typedef Concurrency::concurrent_unordered_set<std::wstring> ConnectSet;
+typedef Concurrency::concurrent_unordered_map<std::wstring, std::wstring> ConnectMap;
 
 class ConnectList
 {
@@ -11,7 +11,7 @@ private:
 	ConnectList() {};
 	~ConnectList() {};
 
-	ConnectSet connectSet;
+	ConnectMap connectMap;
 public:
 	static ConnectList* GetConnectList()
 	{
@@ -19,12 +19,11 @@ public:
 		return &cl;
 	}
 
-	bool Insert(std::wstring connectInfo)
+	bool Insert(std::wstring processName, std::wstring connectInfo)
 	{
-		// Find == false is not have
-		if (Find(connectInfo) == false)
+		if (FindFromConnectInfo(connectInfo) == false)
 		{
-			connectSet.insert(connectInfo);
+			connectMap.insert(std::make_pair(processName, connectInfo));
 			return true;
 		}
 		else
@@ -33,9 +32,9 @@ public:
 		}
 	}
 
-	bool Find(std::wstring connectInfo)
+	bool FindFromProcessName(std::wstring processName)
 	{
-		if (connectSet.find(connectInfo) == connectSet.end())
+		if (connectMap.find(processName) == connectMap.end())
 		{
 			return false;
 		}
@@ -43,6 +42,39 @@ public:
 		{
 			return true;
 		}
+	}
+
+	bool FindFromConnectInfo(std::wstring connectInfo)
+	{
+		ConnectMap::iterator iterator = connectMap.begin();
+		while (1)
+		{
+			if (iterator == connectMap.end())
+				break;
+
+			if (iterator->second.compare(connectInfo) == 0)
+				return true;
+
+			iterator++;
+		}
+		return false;
+	}
+
+	const std::wstring FindProcessNameWithConnectInfo(std::wstring connectInfo)
+	{
+		ConnectMap::iterator iterator = connectMap.begin();
+		while (1)
+		{
+			if (iterator == connectMap.end())
+				break;
+
+			if (iterator->second.compare(connectInfo) == 0)
+				return iterator->first;
+
+			iterator++;
+		}
+
+		return L"";
 	}
 };
 
