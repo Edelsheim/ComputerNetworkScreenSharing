@@ -190,6 +190,7 @@
     <ClInclude Include="CListenSocket.h" />
     <ClInclude Include="ComputerNetworkScreenSharing.h" />
     <ClInclude Include="ComputerNetworkScreenSharingDlg.h" />
+    <ClInclude Include="ConnectDialog.h" />
     <ClInclude Include="ConnectList.h" />
     <ClInclude Include="DrawingQueue.h" />
     <ClInclude Include="DrawingView.h" />
@@ -208,6 +209,7 @@
     <ClCompile Include="CListenSocket.cpp" />
     <ClCompile Include="ComputerNetworkScreenSharing.cpp" />
     <ClCompile Include="ComputerNetworkScreenSharingDlg.cpp" />
+    <ClCompile Include="ConnectDialog.cpp" />
     <ClCompile Include="DrawingView.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
