@@ -98,7 +98,7 @@ BOOL DrawingView::DestroyWindow()
 	threadSendStatus = ThreadStatusClose;
 
 	HANDLE threades[2] = { threadReceiveQueue , threadSendQueue};
-	WaitForMultipleObjects(2, threades, TRUE, 1000);
+	WaitForMultipleObjects(2, threades, TRUE, 2000);
 
 	if (threadReceiveQueue != nullptr)
 	{
@@ -145,7 +145,7 @@ void DrawingView::OnLButtonDown(UINT nFlags, CPoint point)
 	CClientDC dc(this);
 	std::string id = "";
 
-	if (server != nullptr && (threadSendStatus == ThreadStatusRun))
+	if (server != nullptr)
 	{
 		dc.MoveTo(point.x, point.y);
 		this->point.x = point.x;
@@ -180,7 +180,7 @@ void DrawingView::OnMouseMove(UINT nFlags, CPoint point)
 		GetClientRect(&my_rect);
 
 		// push to type is 'move'
-		if (server != nullptr && (threadSendStatus == ThreadStatusRun))
+		if (server != nullptr)
 		{
 			std::string id = ClientMap::GetClientMap()->GetValue(L"server");
 			DrawingQueue::GetSendQueue()->Push(point, MOVE_DATA, id, "server");
@@ -223,7 +223,7 @@ void DrawingView::OnMouseMove(UINT nFlags, CPoint point)
 
 			PointDataList::GetQueue()->Insert(this->Name, point, MOVE_DATA, id);
 		}
-		else if (client != nullptr && (threadSendStatus == ThreadStatusRun))
+		else if (client != nullptr)
 		{
 			DrawingQueue::GetSendQueue()->Push(point, MOVE_DATA, "", "client");
 		}
@@ -235,9 +235,9 @@ void DrawingView::OnMouseMove(UINT nFlags, CPoint point)
 afx_msg LRESULT DrawingView::OnDrawpop(WPARAM wParam, LPARAM lParam)
 {
 	PointData point;
-	if (server != nullptr && (threadReceiveStatus == ThreadStatusRun))
+	if (server != nullptr)
 		point = DrawingQueue::GetReceiveQueue()->Pop("server");
-	else if (client != nullptr && (threadReceiveStatus == ThreadStatusRun))
+	else if (client != nullptr)
 		point = DrawingQueue::GetReceiveQueue()->Pop("client");
 	else
 		return 1;
@@ -313,7 +313,7 @@ afx_msg LRESULT DrawingView::OnDrawpop(WPARAM wParam, LPARAM lParam)
 	}
 	pen.DeleteObject();
 
-	if (server != nullptr && (threadSendStatus == ThreadStatusRun))
+	if (server != nullptr)
 	{
 		DrawingQueue::GetSendQueue()->Push(point, "server");
 		PointDataList::GetQueue()->Insert(this->Name, point);
@@ -327,9 +327,9 @@ afx_msg LRESULT DrawingView::OnSenddraw(WPARAM wParam, LPARAM lParam)
 		return 1;
 
 	PointData point;
-	if (server != nullptr && (threadSendStatus == ThreadStatusRun))
+	if (server != nullptr)
 		point = DrawingQueue::GetSendQueue()->Pop("server");
-	else if (client != nullptr && (threadSendStatus == ThreadStatusRun))
+	else if (client != nullptr)
 		point = DrawingQueue::GetSendQueue()->Pop("client");
 	else
 		return 1;
