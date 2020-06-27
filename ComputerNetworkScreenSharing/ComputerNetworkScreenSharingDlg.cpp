@@ -62,6 +62,8 @@ CComputerNetworkScreenSharingDlg::CComputerNetworkScreenSharingDlg(CWnd* pParent
 
 	isClose = false;
 	log_thread = nullptr;
+
+	ActiveProcessIndex = -1;
 }
 
 void CComputerNetworkScreenSharingDlg::DoDataExchange(CDataExchange* pDX)
@@ -91,6 +93,7 @@ void CComputerNetworkScreenSharingDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_ClosePorcess8, ButtonCloseProcess8);
 	DDX_Control(pDX, IDC_ClosePorcess9, ButtonCloseProcess9);
 	DDX_Control(pDX, IDC_ClosePorcess10, ButtonCloseProcess10);
+	DDX_Control(pDX, IDC_ProcessTitle, ProcessTitle);
 }
 
 BEGIN_MESSAGE_MAP(CComputerNetworkScreenSharingDlg, CDialogEx)
@@ -101,6 +104,27 @@ BEGIN_MESSAGE_MAP(CComputerNetworkScreenSharingDlg, CDialogEx)
 	ON_WM_LBUTTONDOWN()
 	ON_WM_MOUSEMOVE()
 	ON_BN_CLICKED(IDC_ServerRunButton, &CComputerNetworkScreenSharingDlg::OnBnClickedServerrun)
+	ON_BN_CLICKED(IDC_ViewMyProcess, &CComputerNetworkScreenSharingDlg::OnClickedViewmyprocess)
+	ON_BN_CLICKED(IDC_ViewProcess1, &CComputerNetworkScreenSharingDlg::OnClickedViewprocess1)
+	ON_BN_CLICKED(IDC_ViewProcess2, &CComputerNetworkScreenSharingDlg::OnClickedViewprocess2)
+	ON_BN_CLICKED(IDC_ViewProcess3, &CComputerNetworkScreenSharingDlg::OnClickedViewprocess3)
+	ON_BN_CLICKED(IDC_ViewProcess4, &CComputerNetworkScreenSharingDlg::OnClickedViewprocess4)
+	ON_BN_CLICKED(IDC_ViewProcess5, &CComputerNetworkScreenSharingDlg::OnClickedViewprocess5)
+	ON_BN_CLICKED(IDC_ViewProcess6, &CComputerNetworkScreenSharingDlg::OnClickedViewprocess6)
+	ON_BN_CLICKED(IDC_ViewProcess7, &CComputerNetworkScreenSharingDlg::OnClickedViewprocess7)
+	ON_BN_CLICKED(IDC_ViewProcess8, &CComputerNetworkScreenSharingDlg::OnClickedViewprocess8)
+	ON_BN_CLICKED(IDC_ViewProcess9, &CComputerNetworkScreenSharingDlg::OnClickedViewprocess9)
+	ON_BN_CLICKED(IDC_ViewProcess10, &CComputerNetworkScreenSharingDlg::OnClickedViewprocess10)
+	ON_BN_CLICKED(IDC_ClosePorcess1, &CComputerNetworkScreenSharingDlg::OnClickedCloseporcess1)
+	ON_BN_CLICKED(IDC_ClosePorcess2, &CComputerNetworkScreenSharingDlg::OnClickedCloseporcess2)
+	ON_BN_CLICKED(IDC_ClosePorcess3, &CComputerNetworkScreenSharingDlg::OnClickedCloseporcess3)
+	ON_BN_CLICKED(IDC_ClosePorcess4, &CComputerNetworkScreenSharingDlg::OnClickedCloseporcess4)
+	ON_BN_CLICKED(IDC_ClosePorcess5, &CComputerNetworkScreenSharingDlg::OnClickedCloseporcess5)
+	ON_BN_CLICKED(IDC_ClosePorcess6, &CComputerNetworkScreenSharingDlg::OnClickedCloseporcess6)
+	ON_BN_CLICKED(IDC_ClosePorcess7, &CComputerNetworkScreenSharingDlg::OnClickedCloseporcess7)
+	ON_BN_CLICKED(IDC_ClosePorcess8, &CComputerNetworkScreenSharingDlg::OnClickedCloseporcess8)
+	ON_BN_CLICKED(IDC_ClosePorcess9, &CComputerNetworkScreenSharingDlg::OnClickedCloseporcess9)
+	ON_BN_CLICKED(IDC_ClosePorcess10, &CComputerNetworkScreenSharingDlg::OnClickedCloseporcess10)
 END_MESSAGE_MAP()
 
 
@@ -117,23 +141,11 @@ void CComputerNetworkScreenSharingDlg::InitEditValue()
 	BOOL check = defaultServerPortStr.LoadStringW(IDS_DefaultServerPort);
 	ASSERT(check);
 	ServerPort.SetWindowTextW(defaultServerPortStr);
-
-	/*
-	CString defaultConnectIPStr;
-	check = defaultConnectIPStr.LoadStringW(IDS_DefaultConnectIP);
-	ASSERT(check);
-	ConnectIP.SetWindowTextW(defaultConnectIPStr);
-
-	CString defaultConnectPortStr;
-	check = defaultConnectPortStr.LoadStringW(IDS_DefaultConnectPort);
-	ASSERT(check);
-	ConnectPort.SetWindowTextW(defaultConnectPortStr);
-	*/
 }
 
 void CComputerNetworkScreenSharingDlg::InitProcessButton()
 {
-	ProcessName[0] = L"MyServer";
+	ProcessName[0] = L"내 공유 화면";
 	ProcessName[1] = L"Process1";
 	ProcessName[2] = L"Process2";
 	ProcessName[3] = L"Process3";
@@ -181,19 +193,17 @@ void CComputerNetworkScreenSharingDlg::InitProcessButton()
 
 void CComputerNetworkScreenSharingDlg::InitDrawingView()
 {
-	CCreateContext context;
 	ZeroMemory(&context, sizeof(context));
 
 	// get picture control size
-	CRect pic_con_rect;
 	GetDlgItem(IDC_PicCon)->GetWindowRect(&pic_con_rect);
 	ScreenToClient(&pic_con_rect);
 
-	//drawing view create
-	dwView = new DrawingView();
-	dwView->Create(NULL, NULL, WS_CHILDWINDOW, pic_con_rect, this, IDD_Draw, &context);
-	dwView->OnInitialUpdate();
-	dwView->ShowWindow(SW_SHOW);
+	////drawing view create
+	//dwView = new DrawingView();
+	//dwView->Create(NULL, NULL, WS_CHILDWINDOW, pic_con_rect, this, IDD_Draw, &context);
+	//dwView->OnInitialUpdate();
+	//dwView->ShowWindow(SW_SHOW);
 
 	// remove picture control
 	GetDlgItem(IDC_PicCon)->DestroyWindow();
@@ -308,32 +318,67 @@ void CComputerNetworkScreenSharingDlg::ServerRun()
 	ServerPort.GetWindowTextW(portStr);
 	port = _ttoi(portStr);
 
-	if (dwView->ServerRun(port))
+
+	ProcessActive[0] = true;
+
+	for (int i = 0; i != MAX_PROCESS; i++)
+	{
+		if (ProcessActive[i] == true)
+			ButtonViewProcessList[i]->EnableWindow(TRUE);
+	}
+
+	if (dwViewList[0] == nullptr)
+	{
+		dwViewList[0] = new DrawingView();
+		dwViewList[0]->Create(NULL, NULL, WS_CHILDWINDOW, pic_con_rect, this, IDD_Draw, &context);
+		dwViewList[0]->OnInitialUpdate();
+		dwViewList[0]->SetName(ProcessName[0]);
+	}
+
+	if (dwViewList[0]->ServerRun(port))
 	{
 		// success log
 		MessageQueue::GetInstance()->Push(L"화면 공유 작동 중");
 		ServerRunButton.SetWindowTextW(_T("내 화면 공유 끄기"));
 		ServerRunButton.EnableWindow(TRUE);
+		ButtonViewProcessList[0]->EnableWindow(FALSE);
+		ProcessTitle.SetWindowTextW(ProcessName[0].c_str());
+
+		dwViewList[0]->ShowWindow(SW_SHOW);
+		ActiveProcessIndex = 0;
 	}
 	else
 	{
 		// error log
-		dwView->ServerClose();
+		dwViewList[0]->ServerClose();
 		ServerRunButton.EnableWindow(TRUE);
+		ButtonViewProcessList[0]->EnableWindow(FALSE);
+		MessageQueue::GetInstance()->Push(L"화면 공유 작동 중지");
 	}
 }
 
 void CComputerNetworkScreenSharingDlg::OnBnClickedServerrun()
 {
-	if (dwView->serverRunning)
+	if (dwViewList[0] == nullptr)
+	{
+		ServerRunButton.EnableWindow(FALSE);
+		ServerRun();
+	}
+	else if (dwViewList[0]->serverRunning)
 	{
 		ServerRunButton.EnableWindow(FALSE);
 
-		dwView->ServerClose();
+		dwViewList[0]->ServerClose();
 
 		MessageQueue::GetInstance()->Push(L"화면 공유 작동 중지");
 		ServerRunButton.SetWindowTextW(_T("내 화면 공유 켜기"));
 		ServerRunButton.EnableWindow(TRUE);
+
+		if (ActiveProcessIndex == 0)
+			ProcessTitle.SetWindowTextW(L"준비 중");
+
+		ButtonViewProcessList[0]->EnableWindow(FALSE);
+		dwViewList[0]->ShowWindow(SW_HIDE);
 	}
 	else
 	{
@@ -341,72 +386,12 @@ void CComputerNetworkScreenSharingDlg::OnBnClickedServerrun()
 		ServerRun();
 	}
 }
-/*
-void CComputerNetworkScreenSharingDlg::OnClickedConnectbutton()
-{
-	BYTE a, b, c, d;
-	CString ip;
-	ConnectIP.GetAddress(a, b, c, d);
-	ip.Format(_T("%d.%d.%d.%d"), a, b, c, d);
-
-	CString port;
-	ConnectPort.GetWindowTextW(port);
-
-	std::wstring str = L"프로세스 연결 ";
-	str.append(ip);
-	str.append(L":");
-	str.append(port);
-
-	std::wstring connect_info = ip;
-	connect_info.append(L":");
-	connect_info.append(port);
-	
-	// get not active process
-	int i = 0;
-	for(i = 0; i != MAX_PROCESS; i++)
-	{
-		if (ProcessActive[i] == false)
-			break;
-	}
-
-	if (i == MAX_PROCESS)
-	{
-		MessageQueue::GetInstance()->Push(L"Process가 전부 활성화 중입니다.");
-		return;
-	}
-
-	// insert return to true, insert done
-	if (ConnectList::GetConnectList()->Insert(ProcessName[i], connect_info))
-	{
-		// check dwView is new process or old process
-		if (dwView->ClientRun(ip, _ttoi(port)))
-		{
-			str.append(L" 접속 성공");
-			ProcessActive[i] = true;
-			MessageQueue::GetInstance()->Push(str);
-		}
-		else
-		{
-			str.append(L" 접속 실패");
-			MessageQueue::GetInstance()->Push(str);
-		}
-	}
-	else
-	{
-		// connect same process
-		std::wstring process_name = ConnectList::GetConnectList()->FindProcessNameWithConnectInfo(connect_info);
-
-		str.append(L" 이미 " + process_name + L"에서 접속 중입니다.");
-		MessageQueue::GetInstance()->Push(str);
-	}
-}
-*/
 
 UINT CComputerNetworkScreenSharingDlg::OnLogThread(LPVOID param)
 {
 	CComputerNetworkScreenSharingDlg* dlg = (CComputerNetworkScreenSharingDlg*)param;
 
-	while (1)
+	while (!isClose)
 	{
 		PostMessageA(dlg->GetSafeHwnd(), WM_POP, NULL, NULL);
 		Sleep(200);
@@ -425,10 +410,293 @@ BOOL CComputerNetworkScreenSharingDlg::DestroyWindow()
 		log_thread = nullptr;
 	}
 
-	if (dwView != nullptr)
+	for (int i = 0; i != MAX_PROCESS; i++)
 	{
-		dwView->DestroyWindow();
-		dwView = nullptr;
+		if (dwViewList[i] != nullptr)
+		{
+			dwViewList[i]->DestroyWindow();
+			dwViewList[i] = nullptr;
+		}
 	}
 	return CDialogEx::DestroyWindow();
+}
+
+void CComputerNetworkScreenSharingDlg::DrawingViewSwitch(int processNum)
+{
+	if (ActiveProcessIndex != -1)
+	{
+		dwViewList[ActiveProcessIndex]->DrawingViewPause();
+		dwViewList[ActiveProcessIndex]->ShowWindow(SW_HIDE);
+	}
+
+	if (dwViewList[processNum] == nullptr)
+	{
+		dwViewList[processNum] = new DrawingView();
+		dwViewList[processNum]->Create(NULL, NULL, WS_CHILDWINDOW, pic_con_rect, this, IDD_Draw, &context);
+		dwViewList[processNum]->OnInitialUpdate();
+		dwViewList[processNum]->SetName(ProcessName[processNum]);
+	}
+	dwViewList[processNum]->DrawingViewStart();
+	ProcessTitle.SetWindowTextW(ProcessName[processNum].c_str());
+	dwViewList[processNum]->ShowWindow(SW_SHOW);
+
+	ActiveProcessIndex = processNum;
+	
+}
+
+void CComputerNetworkScreenSharingDlg::ProcessSwitch(int processNum)
+{
+	// button active
+	for (int i = 0; i != MAX_PROCESS; i++)
+	{
+		if (ProcessActive[i] == true)
+		{
+			if (i == processNum)
+				ButtonViewProcessList[i]->EnableWindow(FALSE);
+			else
+				ButtonViewProcessList[i]->EnableWindow(TRUE);
+		}
+	}
+
+	// set process title text
+	ProcessTitle.SetWindowTextW(ProcessName[processNum].c_str());
+
+	// switch drawing view
+	DrawingViewSwitch(processNum);
+}
+
+#include "ConnectDialog.h"
+void CComputerNetworkScreenSharingDlg::ProcessCtl(int processNum)
+{
+	for (int i = 0; i != MAX_PROCESS; i++)
+	{
+		if (ProcessActive[i] == true)
+		{
+			ButtonViewProcessList[i]->EnableWindow(TRUE);
+			dwViewList[i]->ShowWindow(SW_HIDE);
+		}
+	}
+
+	// is active
+	if (ProcessActive[processNum])
+	{
+		ProcessActive[processNum] = false;
+		ButtonCloseProcessList[processNum]->SetWindowTextW(ConnectServerWString);
+		ButtonViewProcessList[processNum]->EnableWindow(FALSE);
+		dwViewList[processNum]->DestroyWindow();
+		dwViewList[processNum] = nullptr;
+
+		if (ActiveProcessIndex == processNum)
+			ProcessTitle.SetWindowTextW(L"준비 중");
+
+		ConnectList::GetConnectList()->RemoveWithProcessName(ProcessName[processNum]);
+		MessageQueue::GetInstance()->Push(L"Process" + std::to_wstring(processNum) + L" 접속 끊음");
+		return;
+	}
+	else
+	{
+		ConnectDialog* dlg = new ConnectDialog;
+		if (dlg->DoModal() == IDOK)
+		{
+			CString ip = dlg->ip;
+			CString port = dlg->port;
+
+			std::wstring str = L"프로세스 연결 ";
+
+			str.append(ip);
+			str.append(L":");
+			str.append(port);
+
+			std::wstring connect_info = ip;
+			connect_info.append(L":");
+			connect_info.append(port);
+
+			// insert return to true, insert done
+			if (ConnectList::GetConnectList()->Insert(ProcessName[processNum], connect_info))
+			{
+				dwViewList[processNum] = new DrawingView();
+				dwViewList[processNum]->Create(NULL, NULL, WS_CHILDWINDOW, pic_con_rect, this, IDD_Draw, &context);
+				dwViewList[processNum]->OnInitialUpdate();
+				dwViewList[processNum]->SetName(ProcessName[processNum]);
+
+				// check dwView is new process or old process
+				if (dwViewList[processNum]->ClientRun(ip, _ttoi(port)))
+				{
+					str.append(L" 접속 성공");
+					ProcessActive[processNum] = true;
+					ButtonCloseProcessList[processNum]->SetWindowTextW(DisconnectServerWString);
+					ButtonViewProcessList[processNum]->EnableWindow(FALSE);
+					ProcessTitle.SetWindowTextW(ProcessName[processNum].c_str());
+					dwViewList[processNum]->ShowWindow(SW_SHOW);
+					ActiveProcessIndex = processNum;
+					MessageQueue::GetInstance()->Push(str);
+				}
+				else
+				{
+					str.append(L" 접속 실패");
+					ButtonCloseProcessList[processNum]->SetWindowTextW(ConnectServerWString);
+					ButtonViewProcessList[processNum]->EnableWindow(FALSE);
+					ConnectList::GetConnectList()->RemoveWithProcessName(ProcessName[processNum]);
+					MessageQueue::GetInstance()->Push(str);
+				}
+			}
+			else
+			{
+				// connect same process
+				std::wstring process_name = ConnectList::GetConnectList()->GetProcessNameWithConnectInfo(connect_info);
+				ButtonCloseProcessList[processNum]->SetWindowTextW(ConnectServerWString);
+				ButtonViewProcessList[processNum]->EnableWindow(FALSE);
+				str.append(L" 이미 " + process_name + L"에서 접속 중입니다.");
+				MessageQueue::GetInstance()->Push(str);
+			}
+		}
+		delete dlg;
+	}
+}
+
+void CComputerNetworkScreenSharingDlg::OnClickedViewmyprocess()
+{
+	int idx = 0;
+	ProcessSwitch(idx);
+}
+
+
+void CComputerNetworkScreenSharingDlg::OnClickedViewprocess1()
+{
+	int idx = 1;
+	ProcessSwitch(idx);
+}
+
+
+void CComputerNetworkScreenSharingDlg::OnClickedViewprocess2()
+{
+	int idx = 2;
+	ProcessSwitch(idx);
+}
+
+
+void CComputerNetworkScreenSharingDlg::OnClickedViewprocess3()
+{
+	int idx = 3;
+	ProcessSwitch(idx);
+}
+
+
+void CComputerNetworkScreenSharingDlg::OnClickedViewprocess4()
+{
+	int idx = 4;
+	ProcessSwitch(idx);
+}
+
+
+void CComputerNetworkScreenSharingDlg::OnClickedViewprocess5()
+{
+	int idx = 5;
+	ProcessSwitch(idx);
+}
+
+
+void CComputerNetworkScreenSharingDlg::OnClickedViewprocess6()
+{
+	int idx = 6;
+	ProcessSwitch(idx);
+}
+
+
+void CComputerNetworkScreenSharingDlg::OnClickedViewprocess7()
+{
+	int idx = 7;
+	ProcessSwitch(idx);
+}
+
+
+void CComputerNetworkScreenSharingDlg::OnClickedViewprocess8()
+{
+	int idx = 8;
+	ProcessSwitch(idx);
+}
+
+
+void CComputerNetworkScreenSharingDlg::OnClickedViewprocess9()
+{
+	int idx = 9;
+	ProcessSwitch(idx);
+}
+
+
+void CComputerNetworkScreenSharingDlg::OnClickedViewprocess10()
+{
+	int idx = 10;
+	ProcessSwitch(idx);
+}
+
+
+// Close or Connect
+void CComputerNetworkScreenSharingDlg::OnClickedCloseporcess1()
+{
+	int idx = 1;
+	ProcessCtl(idx);
+}
+
+
+void CComputerNetworkScreenSharingDlg::OnClickedCloseporcess2()
+{
+	int idx = 2;
+	ProcessCtl(idx);
+}
+
+
+void CComputerNetworkScreenSharingDlg::OnClickedCloseporcess3()
+{
+	int idx = 3;
+	ProcessCtl(idx);
+}
+
+
+void CComputerNetworkScreenSharingDlg::OnClickedCloseporcess4()
+{
+	int idx = 4;
+	ProcessCtl(idx);
+}
+
+
+void CComputerNetworkScreenSharingDlg::OnClickedCloseporcess5()
+{
+	int idx = 5;
+	ProcessCtl(idx);
+}
+
+
+void CComputerNetworkScreenSharingDlg::OnClickedCloseporcess6()
+{
+	int idx = 6;
+	ProcessCtl(idx);
+}
+
+
+void CComputerNetworkScreenSharingDlg::OnClickedCloseporcess7()
+{
+	int idx = 7;
+	ProcessCtl(idx);
+}
+
+
+void CComputerNetworkScreenSharingDlg::OnClickedCloseporcess8()
+{
+	int idx = 8;
+	ProcessCtl(idx);
+}
+
+
+void CComputerNetworkScreenSharingDlg::OnClickedCloseporcess9()
+{
+	int idx = 9;
+	ProcessCtl(idx);
+}
+
+
+void CComputerNetworkScreenSharingDlg::OnClickedCloseporcess10()
+{
+	int idx = 10;
+	ProcessCtl(idx);
 }

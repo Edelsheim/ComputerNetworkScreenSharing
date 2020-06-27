@@ -39,7 +39,6 @@ public:
 	DrawingView();
 	virtual ~DrawingView();
 
-	bool isClient;
 	bool serverRunning;
 	bool clientRunning;
 
@@ -69,10 +68,22 @@ public:
 	bool ServerRun(UINT port);
 	bool ServerClose();
 
+	void DrawingViewStart();
+	void DrawingViewPause();
+
 
 	// getter, setter
 	void SetName(std::wstring Name) { this->Name = std::wstring(Name.c_str()); };
 	std::wstring GetName() { return this->Name; };
+
+	enum ThreadStatus {
+		ThreadStatusNullptr,
+		ThreadStatusRun,
+		ThreadStatusPause,
+		ThreadStatusClose
+	};
+	ThreadStatus threadReceiveStatus;
+	ThreadStatus threadSendStatus;
 
 private:
 	std::wstring Name;

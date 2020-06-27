@@ -20,13 +20,18 @@ DrawingView::DrawingView()
 	this->point.x = -1;
 	this->point.y = -1;
 	this->Name = _T("");
-	isClient = false;
-	serverRunning = false;
-	clientRunning = false;
+
 	threadReceiveQueue = nullptr;
+	threadReceiveStatus = ThreadStatusNullptr;
+
 	threadSendQueue = nullptr;
+	threadSendStatus = ThreadStatusNullptr;
+
 	server = nullptr;
+	serverRunning = false;
+
 	client = nullptr;
+	clientRunning = false;
 }
 
 DrawingView::~DrawingView()
@@ -89,6 +94,9 @@ void DrawingView::OnInitialUpdate()
 
 BOOL DrawingView::DestroyWindow()
 {
+	threadReceiveStatus = ThreadStatusClose;
+	threadSendStatus = ThreadStatusClose;
+
 	HANDLE threades[2] = { threadReceiveQueue , threadSendQueue};
 	WaitForMultipleObjects(2, threades, TRUE, 1000);
 
@@ -137,7 +145,7 @@ void DrawingView::OnLButtonDown(UINT nFlags, CPoint point)
 	CClientDC dc(this);
 	std::string id = "";
 
-	if (server != nullptr)
+	if (server != nullptr && (threadSendStatus == ThreadStatusRun))
 	{
 		dc.MoveTo(point.x, point.y);
 		this->point.x = point.x;
@@ -160,6 +168,10 @@ void DrawingView::OnLButtonDown(UINT nFlags, CPoint point)
 void DrawingView::OnMouseMove(UINT nFlags, CPoint point)
 {
 	CClientDC dc(this);
+	CPen pen;
+
+	pen.CreatePen(PS_SOLID, 1, RGB(255, 0, 0));
+	dc.SelectObject(&pen);
 
 	// check  clicked mouse left button
 	if ((nFlags && MK_LBUTTON) == MK_LBUTTON)
@@ -168,7 +180,7 @@ void DrawingView::OnMouseMove(UINT nFlags, CPoint point)
 		GetClientRect(&my_rect);
 
 		// push to type is 'move'
-		if (server != nullptr)
+		if (server != nullptr && (threadSendStatus == ThreadStatusRun))
 		{
 			std::string id = ClientMap::GetClientMap()->GetValue(L"server");
 			DrawingQueue::GetSendQueue()->Push(point, MOVE_DATA, id, "server");
@@ -211,21 +223,33 @@ void DrawingView::OnMouseMove(UINT nFlags, CPoint point)
 
 			PointDataList::GetQueue()->Insert(this->Name, point, MOVE_DATA, id);
 		}
-		else if (client != nullptr)
+		else if (client != nullptr && (threadSendStatus == ThreadStatusRun))
 		{
 			DrawingQueue::GetSendQueue()->Push(point, MOVE_DATA, "", "client");
 		}
 	}
+	pen.DeleteObject();
 	CFormView::OnMouseMove(nFlags, point);
 }
 
 afx_msg LRESULT DrawingView::OnDrawpop(WPARAM wParam, LPARAM lParam)
 {
-	PointData point = DrawingQueue::GetReceiveQueue()->Pop();
+	PointData point;
+	if (server != nullptr && (threadReceiveStatus == ThreadStatusRun))
+		point = DrawingQueue::GetReceiveQueue()->Pop("server");
+	else if (client != nullptr && (threadReceiveStatus == ThreadStatusRun))
+		point = DrawingQueue::GetReceiveQueue()->Pop("client");
+	else
+		return 1;
+
 	if (point.x <= -1 || point.y <= -1)
 		return 1;
 
 	CClientDC dc(this);
+	CPen pen;
+
+	pen.CreatePen(PS_SOLID, 1, RGB(255, 0, 0));
+	dc.SelectObject(&pen);
 
 	// get this view rect
 	RECT my_rect;
@@ -287,8 +311,9 @@ afx_msg LRESULT DrawingView::OnDrawpop(WPARAM wParam, LPARAM lParam)
 		this->receivePointes.at(client_id).x = point.x;
 		this->receivePointes.at(client_id).y = point.y;
 	}
+	pen.DeleteObject();
 
-	if (server != nullptr)
+	if (server != nullptr && (threadSendStatus == ThreadStatusRun))
 	{
 		DrawingQueue::GetSendQueue()->Push(point, "server");
 		PointDataList::GetQueue()->Insert(this->Name, point);
@@ -301,7 +326,14 @@ afx_msg LRESULT DrawingView::OnSenddraw(WPARAM wParam, LPARAM lParam)
 	if (server != nullptr && client != nullptr)
 		return 1;
 
-	PointData point = DrawingQueue::GetSendQueue()->Pop();
+	PointData point;
+	if (server != nullptr && (threadSendStatus == ThreadStatusRun))
+		point = DrawingQueue::GetSendQueue()->Pop("server");
+	else if (client != nullptr && (threadSendStatus == ThreadStatusRun))
+		point = DrawingQueue::GetSendQueue()->Pop("client");
+	else
+		return 1;
+
 	if (point.x == -1 || point.y == -1)
 	{
 		return 1;
@@ -329,11 +361,18 @@ afx_msg LRESULT DrawingView::OnSenddraw(WPARAM wParam, LPARAM lParam)
 
 UINT DrawingView::threadReceiveQeueuRunner(LPVOID param)
 {
-	DrawingView* thisView = (DrawingView*)param;
+	DrawingView* dv = (DrawingView*)param;
 	MessageQueue::GetInstance()->Push(L"Thread Receive Queue Runner");
+	dv->threadReceiveStatus = ThreadStatusRun;
+
 	while (1)
 	{
-		PostMessageA(thisView->m_hWnd, WM_DRAWPOP, NULL, NULL);
+		if (dv->threadReceiveStatus == ThreadStatusClose)
+			break;
+		//if (dv->threadReceiveStatus == ThreadStatusPause)
+		//	continue;
+
+		PostMessageA(dv->m_hWnd, WM_DRAWPOP, NULL, NULL);
 		Sleep(1);
 	}
 	return 0;
@@ -343,8 +382,15 @@ UINT DrawingView::threadSendQueueRunner(LPVOID param)
 {
 	DrawingView* dv = (DrawingView*)param;
 	MessageQueue::GetInstance()->Push(L"Thread Send Queue Runner");
+	dv->threadSendStatus = ThreadStatusRun;
+
 	while (1)
 	{
+		if (dv->threadSendStatus == ThreadStatusClose)
+			break;
+		//if (dv->threadSendStatus == ThreadStatusPause)
+		//	continue;
+
 		PostMessageA(dv->m_hWnd, WM_SENDDRAW, NULL, NULL);
 		Sleep(1);
 	}
@@ -353,7 +399,7 @@ UINT DrawingView::threadSendQueueRunner(LPVOID param)
 
 bool DrawingView::ClientRun(CString ip, UINT port)
 {
-	if (server != nullptr && serverRunning)
+	if (server != nullptr)
 	{
 		clientRunning = false;
 		return false;
@@ -441,4 +487,16 @@ bool DrawingView::ServerClose()
 	server = nullptr;
 	serverRunning = false;
 	return true;
+}
+
+void DrawingView::DrawingViewStart()
+{
+	threadReceiveStatus = ThreadStatusRun;
+	threadSendStatus = ThreadStatusRun;
+}
+
+void DrawingView::DrawingViewPause()
+{
+	threadReceiveStatus = ThreadStatusPause;
+	threadSendStatus = ThreadStatusPause;
 }

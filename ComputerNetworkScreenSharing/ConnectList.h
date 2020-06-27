@@ -60,14 +60,13 @@ public:
 		return false;
 	}
 
-	const std::wstring FindProcessNameWithConnectInfo(std::wstring connectInfo)
+	const std::wstring GetProcessNameWithConnectInfo(std::wstring connectInfo)
 	{
 		ConnectMap::iterator iterator = connectMap.begin();
 		while (1)
 		{
 			if (iterator == connectMap.end())
 				break;
-
 			if (iterator->second.compare(connectInfo) == 0)
 				return iterator->first;
 
@@ -75,6 +74,31 @@ public:
 		}
 
 		return L"";
+	}
+
+	bool RemoveWithProcessName(std::wstring processName)
+	{
+		connectMap.unsafe_erase(processName);
+		return true;
+	}
+
+	bool RemoveWithConnectInfo(std::wstring connectInfo)
+	{
+		ConnectMap::iterator iterator = connectMap.begin();
+		while (1)
+		{
+			if (iterator == connectMap.end())
+				break;
+			if (iterator->second.compare(connectInfo) == 0)
+			{
+				std::wstring key = iterator->first;
+				connectMap.unsafe_erase(key);
+				return true;
+			}
+				
+			iterator++;
+		}
+		return false;
 	}
 };
 
