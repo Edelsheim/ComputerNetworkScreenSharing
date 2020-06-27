@@ -31,6 +31,7 @@ protected:
 	void InitCustomDialog();
 	void InitEditValue();
 	void InitProcessButton();
+	void InitDrawingView();
 
 	// 생성된 메시지 맵 함수
 	virtual BOOL OnInitDialog();
@@ -48,13 +49,8 @@ private:
 	CEdit ServerPort;
 	CButton ServerRunButton;
 
-	CIPAddressCtrl ConnectIP;
-	CEdit ConnectPort;
-	CButton ConnectButton;
-
 	CListBox LogList;
 
-	void InitDrawingView();
 	void ServerRun();
 
 	// thread
@@ -62,11 +58,10 @@ private:
 
 	// list process
 	// Drawing View
-
+	DrawingView* dwViewList[MAX_PROCESS];
 	
 public:
 	afx_msg void OnBnClickedServerrun();
-	afx_msg void OnClickedConnectbutton();
 
 	// thread function
 	static UINT OnLogThread(LPVOID param);
@@ -74,6 +69,30 @@ public:
 private:
 	std::wstring ProcessName[MAX_PROCESS];
 	bool ProcessActive[MAX_PROCESS];
+	CButton* ButtonViewProcessList[MAX_PROCESS];
+	CButton* ButtonCloseProcessList[MAX_PROCESS];
+
+	CButton ButtonViewMyProcess;
+	CButton ButtonViewProcess1;
+	CButton ButtonViewProcess2;
+	CButton ButtonViewProcess3;
+	CButton ButtonViewProcess4;
+	CButton ButtonViewProcess5;
+	CButton ButtonViewProcess6;
+	CButton ButtonViewProcess7;
+	CButton ButtonViewProcess8;
+	CButton ButtonViewProcess9;
+	CButton ButtonViewProcess10;
+	CButton ButtonCloseProcess1;
+	CButton ButtonCloseProcess2;
+	CButton ButtonCloseProcess3;
+	CButton ButtonCloseProcess4;
+	CButton ButtonCloseProcess5;
+	CButton ButtonCloseProcess6;
+	CButton ButtonCloseProcess7;
+	CButton ButtonCloseProcess8;
+	CButton ButtonCloseProcess9;
+	CButton ButtonCloseProcess10;
 };
 
 static BOOL isClose;

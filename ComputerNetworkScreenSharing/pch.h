@@ -21,5 +21,7 @@
 #define MOVE_DATA 'm'
 
 #define MAX_PROCESS 11
+#define ConnectServerWString L"연결 하기"
+#define DisconnectServerWString L"연결 끊기"
 
 #endif //PCH_H
