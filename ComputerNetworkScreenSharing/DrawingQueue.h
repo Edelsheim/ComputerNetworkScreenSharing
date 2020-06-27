@@ -6,7 +6,8 @@
 class DrawingQueue
 {
 private:
-	Concurrency::concurrent_queue<PointData> queue;
+	Concurrency::concurrent_queue<PointData> client_queue;
+	Concurrency::concurrent_queue<PointData> server_queue;
 public:
 	static DrawingQueue* GetReceiveQueue()
 	{
@@ -20,12 +21,15 @@ public:
 		return &sendQueue;
 	}
 
-	void Push(PointData point)
+	void Push(PointData point, std::string queueType)
 	{
-		queue.push(point);
+		if (queueType.compare("server") == 0)
+			server_queue.push(point);
+		else
+			client_queue.push(point);
 	}
 
-	void Push(CPoint point, char type, std::string id)
+	void Push(CPoint point, char type, std::string id, std::string queueType)
 	{
 		PointData point_data;
 		point_data.type = type;
@@ -44,13 +48,23 @@ public:
 
 		point_data.x = point.x;
 		point_data.y = point.y;
-		Push(point_data);
+		Push(point_data, queueType);
 	}
 
-	PointData Pop()
+	PointData Pop(std::string queueType)
 	{
 		PointData point;
-		bool check = queue.try_pop(point);
+		bool check = false;
+
+		if (queueType.compare("server") == 0)
+		{
+			check = server_queue.try_pop(point);
+		}
+		else
+		{
+			check = client_queue.try_pop(point);
+		}
+		
 		if (check)
 		{
 			return point;

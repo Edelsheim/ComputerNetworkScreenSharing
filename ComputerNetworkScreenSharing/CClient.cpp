@@ -84,7 +84,7 @@ void CClient::OnReceive(int nErrorCode)
 		point_data.x = point_x;
 		point_data.y = point_y;
 
-		DrawingQueue::GetReceiveQueue()->Push(point_data);
+		DrawingQueue::GetReceiveQueue()->Push(point_data, "server");
 	}
 	CSocket::OnReceive(nErrorCode);
 }
