@@ -377,6 +377,18 @@ bool DrawingView::ClientRun(CString ip, UINT port)
 	}
 }
 
+bool DrawingView::ClientClose()
+{
+	if (client != nullptr)
+	{
+		client->Close();
+		delete client;
+	}
+	client = nullptr;
+	clientRunning = false;
+	return true;
+}
+
 bool DrawingView::ServerRun(UINT port)
 {
 	if (client != nullptr && clientRunning)
@@ -424,13 +436,9 @@ bool DrawingView::ServerClose()
 	{
 		server->Close();
 		delete server;
-		server = nullptr;
-	}
-	else
-	{
-		server = nullptr;
 	}
 
+	server = nullptr;
 	serverRunning = false;
 	return true;
 }

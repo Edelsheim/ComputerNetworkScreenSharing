@@ -65,6 +65,7 @@ public:
 
 	// view thread runner call
 	bool ClientRun(CString ip, UINT port);
+	bool ClientClose();
 	bool ServerRun(UINT port);
 	bool ServerClose();
 
