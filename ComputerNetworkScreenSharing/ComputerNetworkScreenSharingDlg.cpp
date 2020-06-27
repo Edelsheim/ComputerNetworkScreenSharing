@@ -404,20 +404,20 @@ BOOL CComputerNetworkScreenSharingDlg::DestroyWindow()
 {
 	isClose = true;
 
-	if (log_thread != nullptr)
-	{
-		log_thread->ExitInstance();
-		log_thread = nullptr;
-	}
-
 	for (int i = 0; i != MAX_PROCESS; i++)
 	{
 		if (dwViewList[i] != nullptr)
 		{
 			dwViewList[i]->DestroyWindow();
-			dwViewList[i] = nullptr;
 		}
+		dwViewList[i] = nullptr;
 	}
+
+	if (log_thread != nullptr)
+	{
+		WaitForSingleObject(log_thread, 1000);
+	}
+	log_thread = nullptr;
 	return CDialogEx::DestroyWindow();
 }
 
@@ -441,7 +441,6 @@ void CComputerNetworkScreenSharingDlg::DrawingViewSwitch(int processNum)
 	dwViewList[processNum]->ShowWindow(SW_SHOW);
 
 	ActiveProcessIndex = processNum;
-	
 }
 
 void CComputerNetworkScreenSharingDlg::ProcessSwitch(int processNum)
@@ -452,9 +451,13 @@ void CComputerNetworkScreenSharingDlg::ProcessSwitch(int processNum)
 		if (ProcessActive[i] == true)
 		{
 			if (i == processNum)
+			{
 				ButtonViewProcessList[i]->EnableWindow(FALSE);
+			}
 			else
+			{
 				ButtonViewProcessList[i]->EnableWindow(TRUE);
+			}
 		}
 	}
 
@@ -560,13 +563,11 @@ void CComputerNetworkScreenSharingDlg::OnClickedViewmyprocess()
 	ProcessSwitch(idx);
 }
 
-
 void CComputerNetworkScreenSharingDlg::OnClickedViewprocess1()
 {
 	int idx = 1;
 	ProcessSwitch(idx);
 }
-
 
 void CComputerNetworkScreenSharingDlg::OnClickedViewprocess2()
 {
@@ -574,13 +575,11 @@ void CComputerNetworkScreenSharingDlg::OnClickedViewprocess2()
 	ProcessSwitch(idx);
 }
 
-
 void CComputerNetworkScreenSharingDlg::OnClickedViewprocess3()
 {
 	int idx = 3;
 	ProcessSwitch(idx);
 }
-
 
 void CComputerNetworkScreenSharingDlg::OnClickedViewprocess4()
 {
@@ -588,13 +587,11 @@ void CComputerNetworkScreenSharingDlg::OnClickedViewprocess4()
 	ProcessSwitch(idx);
 }
 
-
 void CComputerNetworkScreenSharingDlg::OnClickedViewprocess5()
 {
 	int idx = 5;
 	ProcessSwitch(idx);
 }
-
 
 void CComputerNetworkScreenSharingDlg::OnClickedViewprocess6()
 {
@@ -602,13 +599,11 @@ void CComputerNetworkScreenSharingDlg::OnClickedViewprocess6()
 	ProcessSwitch(idx);
 }
 
-
 void CComputerNetworkScreenSharingDlg::OnClickedViewprocess7()
 {
 	int idx = 7;
 	ProcessSwitch(idx);
 }
-
 
 void CComputerNetworkScreenSharingDlg::OnClickedViewprocess8()
 {
@@ -616,13 +611,11 @@ void CComputerNetworkScreenSharingDlg::OnClickedViewprocess8()
 	ProcessSwitch(idx);
 }
 
-
 void CComputerNetworkScreenSharingDlg::OnClickedViewprocess9()
 {
 	int idx = 9;
 	ProcessSwitch(idx);
 }
-
 
 void CComputerNetworkScreenSharingDlg::OnClickedViewprocess10()
 {
@@ -638,13 +631,11 @@ void CComputerNetworkScreenSharingDlg::OnClickedCloseporcess1()
 	ProcessCtl(idx);
 }
 
-
 void CComputerNetworkScreenSharingDlg::OnClickedCloseporcess2()
 {
 	int idx = 2;
 	ProcessCtl(idx);
 }
-
 
 void CComputerNetworkScreenSharingDlg::OnClickedCloseporcess3()
 {
@@ -652,13 +643,11 @@ void CComputerNetworkScreenSharingDlg::OnClickedCloseporcess3()
 	ProcessCtl(idx);
 }
 
-
 void CComputerNetworkScreenSharingDlg::OnClickedCloseporcess4()
 {
 	int idx = 4;
 	ProcessCtl(idx);
 }
-
 
 void CComputerNetworkScreenSharingDlg::OnClickedCloseporcess5()
 {
@@ -666,13 +655,11 @@ void CComputerNetworkScreenSharingDlg::OnClickedCloseporcess5()
 	ProcessCtl(idx);
 }
 
-
 void CComputerNetworkScreenSharingDlg::OnClickedCloseporcess6()
 {
 	int idx = 6;
 	ProcessCtl(idx);
 }
-
 
 void CComputerNetworkScreenSharingDlg::OnClickedCloseporcess7()
 {
@@ -680,20 +667,17 @@ void CComputerNetworkScreenSharingDlg::OnClickedCloseporcess7()
 	ProcessCtl(idx);
 }
 
-
 void CComputerNetworkScreenSharingDlg::OnClickedCloseporcess8()
 {
 	int idx = 8;
 	ProcessCtl(idx);
 }
 
-
 void CComputerNetworkScreenSharingDlg::OnClickedCloseporcess9()
 {
 	int idx = 9;
 	ProcessCtl(idx);
 }
-
 
 void CComputerNetworkScreenSharingDlg::OnClickedCloseporcess10()
 {
