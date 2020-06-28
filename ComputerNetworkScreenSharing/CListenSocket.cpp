@@ -76,27 +76,32 @@ void CListenSocket::OnAccept(int nErrorCode)
 		// send point data list
 		// synchro drawing point
 		PointDataListMap data_info = PointDataList::GetQueue()->point_data_map;
-		PointDataListMap::iterator data_info_iterator = data_info.begin();
+		PointDataListMap::const_iterator iterator = data_info.cbegin();
+
 		while (1)
 		{
-			if (data_info_iterator == data_info.end())
+			if (iterator == data_info.cend())
 				break;
-			PointDataVector data = data_info_iterator->second;
-			PointDataVector::iterator data_iterator = data.begin();
-			while (1)
+
+			if (iterator->first.compare(L"내 공유 화면") == 0)
 			{
-				if (data_iterator == data.end())
-					break;
+				PointDataVector data = iterator->second;
+				PointDataVector::const_iterator data_iterator = data.cbegin();
+				while (1)
+				{
+					if (data_iterator == data.cend())
+						break;
 
-				PointData data = (*data_iterator);
-				char message[DATA_SIZE + CLIENT_NAME_SIZE] = { 0, };
-				data.GetData(message);
-				client->Send(message, DATA_SIZE + CLIENT_NAME_SIZE);
-				
-				data_iterator++;
+					PointData data = (*data_iterator);
+					char message[DATA_SIZE + CLIENT_NAME_SIZE] = { 0, };
+					data.GetData(message);
+					client->Send(message, DATA_SIZE + CLIENT_NAME_SIZE);
+
+					data_iterator++;
+				}
+				break;
 			}
-
-			data_info_iterator++;
+			iterator++;
 		}
 		MessageQueue::GetInstance()->Push(L"새로운 사용자와 데이터 연동이 완료되었습니다.");
 	}
@@ -112,7 +117,6 @@ void CListenSocket::CloseClientSocket(CSocket* client)
 		client->ShutDown();
 		client->Close();
 	}
-
 	// remove to list
 	clientSocketList.RemoveAt(pos);
 	delete client;

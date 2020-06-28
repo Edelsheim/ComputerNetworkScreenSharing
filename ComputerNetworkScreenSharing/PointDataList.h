@@ -50,5 +50,19 @@ public:
 		point_data.id[i] = '\0';
 		Insert(key, point_data);
 	}
+
+	const PointDataVector GetData(std::wstring key)
+	{
+		PointDataVector empty_data;
+		empty_data.clear();
+		if (point_data_map.find(key) == point_data_map.end())
+		{
+			return empty_data;
+		}
+		else
+		{
+			return point_data_map.at(key);
+		}
+	}
 };
 
