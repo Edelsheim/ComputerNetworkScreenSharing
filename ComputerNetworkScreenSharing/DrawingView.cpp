@@ -541,66 +541,7 @@ void DrawingView::DrawingPoint()
 			DrawingQueue::GetReceiveQueue()->Push(point, "server");
 		else if (client != nullptr)
 			DrawingQueue::GetReceiveQueue()->Push(point, "client");
-		/*
 
-		// get client id
-		std::string client_id = std::string(point.id);
-
-		// not find client_id, it is new client
-		if (this->receivePointes.find(client_id) == this->receivePointes.end())
-		{
-			CPoint data;
-			data.x = point.x;
-			data.y = point.y;
-			this->receivePointes.insert(std::make_pair(client_id, data));
-		}
-
-		if (point.type == 'c') // check type is 'click'
-		{
-			dc.MoveTo(point.x, point.y);
-			this->receivePointes.at(client_id).x = point.x;
-			this->receivePointes.at(client_id).y = point.y;
-		}
-		else if (point.x <= my_rect.left + 2)
-		{
-			dc.MoveTo(my_rect.left, point.y);
-			dc.LineTo(point.x, point.y);
-			this->receivePointes.at(client_id).x = point.x;
-			this->receivePointes.at(client_id).y = point.y;
-		}
-		else if (point.x >= my_rect.right - 3)
-		{
-			dc.MoveTo(my_rect.right, point.y);
-			dc.LineTo(point.x, point.y);
-			this->receivePointes.at(client_id).x = point.x;
-			this->receivePointes.at(client_id).y = point.y;
-		}
-		else if (point.y <= my_rect.top + 3)
-		{
-			dc.MoveTo(point.x, my_rect.top);
-			dc.LineTo(point.x, point.y);
-			this->receivePointes.at(client_id).x = point.x;
-			this->receivePointes.at(client_id).y = point.y;
-		}
-		else if (point.y >= my_rect.bottom - 3)
-		{
-			dc.MoveTo(point.x, my_rect.bottom);
-			dc.LineTo(point.x, point.y);
-			this->receivePointes.at(client_id).x = point.x;
-			this->receivePointes.at(client_id).y = point.y;
-		}
-		else
-		{
-			LONG x = this->receivePointes.at(client_id).x;
-			LONG y = this->receivePointes.at(client_id).y;
-
-			dc.MoveTo(x, y);
-			dc.LineTo(point.x, point.y);
-			this->receivePointes.at(client_id).x = point.x;
-			this->receivePointes.at(client_id).y = point.y;
-		}
-
-		*/
 		iterator++;
 	}
 	pen.DeleteObject();
