@@ -171,6 +171,7 @@
       <SubSystem>Windows</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
+      <UACExecutionLevel>RequireAdministrator</UACExecutionLevel>
     </Link>
     <Midl>
       <MkTypLibCompatible>false</MkTypLibCompatible>
@@ -186,15 +187,20 @@
   <ItemGroup>
     <ClInclude Include="CClient.h" />
     <ClInclude Include="CClientSocket.h" />
+    <ClInclude Include="ClientMap.h" />
     <ClInclude Include="CListenSocket.h" />
     <ClInclude Include="ComputerNetworkScreenSharing.h" />
     <ClInclude Include="ComputerNetworkScreenSharingDlg.h" />
+    <ClInclude Include="ConnectDialog.h" />
+    <ClInclude Include="ConnectList.h" />
     <ClInclude Include="DrawingQueue.h" />
     <ClInclude Include="DrawingView.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="MessageQueue.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="PointData.h" />
+    <ClInclude Include="PointDataList.h" />
+    <ClInclude Include="ProcessList.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="targetver.h" />
   </ItemGroup>
@@ -204,6 +210,7 @@
     <ClCompile Include="CListenSocket.cpp" />
     <ClCompile Include="ComputerNetworkScreenSharing.cpp" />
     <ClCompile Include="ComputerNetworkScreenSharingDlg.cpp" />
+    <ClCompile Include="ConnectDialog.cpp" />
     <ClCompile Include="DrawingView.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>

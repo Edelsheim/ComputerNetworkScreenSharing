@@ -5,50 +5,42 @@ class PointData
 {
 public:
 	char type;
+	char id[CLIENT_NAME_SIZE];
 	LONG x;
 	LONG y;
 
 	PointData() {
 		type = 'c';
+		memset(id, 0, CLIENT_NAME_SIZE);
 		x = -1;
 		y = -1;
 	};
 	~PointData() {};
 
-	std::wstring ToWString()
+	void GetData(char* data)
 	{
-		std::wstring result = L"";
-		CStringW str(type);
-		result.append(str);
-		result.append(L"x");
+		int x_ = x;
+		int y_ = y;
 
-		LONG x_ = x;
-		LONG y_ = y;
-		
-		int num = (int)(x_ / 1000);
+		data[0] = type;
+		data[1] = 'x';
+		data[2] = (int)(x_ / 1000) + '0';
 		x_ = x_ % 1000;
-		result.append(std::to_wstring(num));
-		num = (int)(x_ / 100);
+		data[3] = (int)(x_ / 100) + '0';
 		x_ = x_ % 100;
-		result.append(std::to_wstring(num));
-		num = (int)(x_ / 10);
-		result.append(std::to_wstring(num));
-		num = (int)(x_ % 10);
-		result.append(std::to_wstring(num));
+		data[4] = (int)(x_ / 10) + '0';
+		data[5] = (int)(x_ % 10) + '0';
 
-		result.append(L"y");
-		num = (int)(y_ / 1000);
+		data[6] = 'y';
+		data[7] = (int)(y_ / 1000) + '0';
 		y_ = y_ % 1000;
-		result.append(std::to_wstring(num));
-		num = (int)(y_ / 100);
-		y_ = y_ % 100;
-		result.append(std::to_wstring(num));
-		num = (int)(y_ / 10);
-		result.append(std::to_wstring(num));
-		num = (int)(y_ % 10);
-		result.append(std::to_wstring(num));
+		data[8] = (int)(y_ / 100) + '0';
+		y_ = y_ % 100;;
+		data[9] = (int)(y_ / 10) + '0';
+		data[10] = (int)(y_ % 10) + '0';
 
-		return result;
+		for (int i = 0; i != CLIENT_NAME_SIZE; i++)
+			data[11 + i] = id[i];
 	}
 
 	std::string ToString()
@@ -89,6 +81,9 @@ public:
 
 		num = (int)(y_ % 10);
 		result += std::to_string(num);
+
+		for (int i = 0; i != CLIENT_NAME_SIZE; i++)
+			result += id[i];
 
 		return result;
 	}

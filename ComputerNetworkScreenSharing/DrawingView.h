@@ -2,13 +2,23 @@
 
 // DrawingView 폼 보기
 
+#include "CClientSocket.h"
+#include "CListenSocket.h"
+
+#include <iostream>
+#include <concurrent_unordered_map.h>
+typedef Concurrency::concurrent_unordered_map<std::string, CPoint> ClientCPointMap;
+
 class DrawingView : public CFormView
 {
 	DECLARE_DYNCREATE(DrawingView)
 
 private:
 	CPoint point; // draw point
-	CPoint receivePoint;
+	ClientCPointMap receivePointes;
+
+	CListenSocket* server;
+	CClientSocket* client;
 
 public:
 #ifdef AFX_DESIGN_TIME
@@ -29,7 +39,8 @@ public:
 	DrawingView();
 	virtual ~DrawingView();
 
-	bool isClient;
+	bool serverRunning;
+	bool clientRunning;
 
 	// call protected's CFormView methods
 	virtual BOOL Create(LPCTSTR lpszClassName, LPCTSTR lpszWindowName, DWORD dwStyle, const RECT& rect, CWnd* pParentWnd, UINT nID, CCreateContext* pContext = NULL);
@@ -45,15 +56,40 @@ public:
 
 	// message call
 	afx_msg LRESULT OnDrawpop(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnSenddraw(WPARAM wParam, LPARAM lParam);
+	afx_msg void OnShowWindow(BOOL bShow, UINT nStatus);
 
 	// thread runner
 	static UINT threadReceiveQeueuRunner(LPVOID param);
+	static UINT threadSendQueueRunner(LPVOID param);
 
 	// view thread runner call
-	void ClientRun();
+	bool ClientRun(CString ip, UINT port);
+	bool ClientClose();
+	bool ServerRun(UINT port);
+	bool ServerClose();
+
+	void DrawingViewStart();
+	void DrawingViewPause();
+	void DrawingPoint();
+
+	// getter, setter
+	void SetName(std::wstring Name) { this->Name = std::wstring(Name.c_str()); };
+	std::wstring GetName() { return this->Name; };
+
+	enum ThreadStatus {
+		ThreadStatusNullptr,
+		ThreadStatusRun,
+		ThreadStatusPause,
+		ThreadStatusClose
+	};
+	ThreadStatus threadReceiveStatus;
+	ThreadStatus threadSendStatus;
 
 private:
+	std::wstring Name;
 	CWinThread* threadReceiveQueue;
+	CWinThread* threadSendQueue;
 };
 
 
