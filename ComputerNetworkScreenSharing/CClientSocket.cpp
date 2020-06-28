@@ -6,6 +6,7 @@
 
 CClientSocket::CClientSocket() : CSocket()
 {
+	isAlive = false;
 }
 
 CClientSocket::~CClientSocket()
@@ -14,6 +15,7 @@ CClientSocket::~CClientSocket()
 
 void CClientSocket::OnClose(int nErrorCode)
 {
+	isAlive = false;
 	ShutDown();
 	Close();
 	CSocket::OnClose(nErrorCode);
@@ -48,4 +50,12 @@ void CClientSocket::OnReceive(int nErrorCode)
 		DrawingQueue::GetReceiveQueue()->Push(point_data, "client");
 	}
 	CSocket::OnReceive(nErrorCode);
+}
+
+int CClientSocket::Send(const void* lpBuf, int nBufLen, int nFlags)
+{
+	if (isAlive)
+		return CSocket::Send(lpBuf, nBufLen, nFlags);
+	else
+		return -1;
 }
