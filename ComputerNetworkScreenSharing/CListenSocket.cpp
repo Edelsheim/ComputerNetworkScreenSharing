@@ -1,15 +1,17 @@
 #include "pch.h"
 #include "CListenSocket.h"
+
 #include "CClient.h"
+
 #include "MessageQueue.h"
-#include "DrawingQueue.h"
 #include "ClientMap.h"
 #include "PointDataList.h"
 
-CListenSocket::CListenSocket() : CAsyncSocket()
+CListenSocket::CListenSocket(DrawingQueue &queue) : CAsyncSocket()
 {
 	PlayerIndex = 1;
-	
+	this->queue = &queue;
+
 	// insert to server
 	// server:000000000000
 	CString key;
@@ -68,7 +70,7 @@ void CListenSocket::OnAccept(int nErrorCode)
 		ClientMap::GetClientMap()->Insert(key, value_str);
 		MessageQueue::GetInstance()->Push(L"새로운 사용자와 연결되었습니다 : " + key);
 		
-		client->SetListenSocket(this); // set client's follw this socket
+		client->SetListenSocket(this, this->queue); // set client's follw this socket
 		clientSocketList.AddTail(client); // add to client list
 		CAsyncSocket::OnAccept(nErrorCode);
 

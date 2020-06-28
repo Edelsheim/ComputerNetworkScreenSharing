@@ -4,9 +4,10 @@
 #include "DrawingQueue.h"
 #include <string>
 
-CClientSocket::CClientSocket() : CSocket()
+CClientSocket::CClientSocket(DrawingQueue& queue) : CSocket()
 {
 	isAlive = false;
+	this->queue = &queue;
 }
 
 CClientSocket::~CClientSocket()
@@ -50,7 +51,7 @@ void CClientSocket::OnReceive(int nErrorCode)
 			point_data.id[i] = data[11 + i];
 		point_data.x = point_x;
 		point_data.y = point_y;
-		DrawingQueue::GetReceiveQueue()->Push(point_data, "client");
+		queue->Push(point_data, "client");
 	}
 	CSocket::OnReceive(nErrorCode);
 }

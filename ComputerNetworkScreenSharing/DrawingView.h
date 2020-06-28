@@ -7,6 +7,7 @@
 
 #include <iostream>
 #include <concurrent_unordered_map.h>
+#include "DrawingQueue.h"
 typedef Concurrency::concurrent_unordered_map<std::string, CPoint> ClientCPointMap;
 
 class DrawingView : public CFormView
@@ -92,6 +93,10 @@ private:
 	CWinThread* threadSendQueue;
 	CString serverIP;
 	UINT serverPort;
+
+	DrawingQueue sendQueue;
+	DrawingQueue receiveQueue;
+	DrawingQueue drawQueue;
 };
 
 

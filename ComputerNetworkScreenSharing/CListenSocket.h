@@ -1,13 +1,15 @@
 #pragma once
 #include <afxsock.h>
+#include "DrawingQueue.h"
 
 static LONG PlayerIndex;
 
 class CListenSocket :
 	public CAsyncSocket
 {
+	DrawingQueue* queue;
 public:
-	CListenSocket();
+	CListenSocket(DrawingQueue& queue);
 	~CListenSocket();
 
 	CPtrList clientSocketList;
