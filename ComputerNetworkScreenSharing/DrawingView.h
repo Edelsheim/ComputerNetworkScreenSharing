@@ -57,6 +57,7 @@ public:
 	// message call
 	afx_msg LRESULT OnDrawpop(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnSenddraw(WPARAM wParam, LPARAM lParam);
+	afx_msg void OnShowWindow(BOOL bShow, UINT nStatus);
 
 	// thread runner
 	static UINT threadReceiveQeueuRunner(LPVOID param);

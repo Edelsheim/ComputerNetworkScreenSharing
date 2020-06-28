@@ -50,6 +50,7 @@ BEGIN_MESSAGE_MAP(DrawingView, CFormView)
 	ON_WM_MOUSEMOVE()
 	ON_MESSAGE(WM_DRAWPOP, &DrawingView::OnDrawpop)
 	ON_MESSAGE(WM_SENDDRAW, &DrawingView::OnSenddraw)
+	ON_WM_SHOWWINDOW()
 END_MESSAGE_MAP()
 
 
@@ -238,6 +239,7 @@ void DrawingView::OnMouseMove(UINT nFlags, CPoint point)
 	CFormView::OnMouseMove(nFlags, point);
 }
 
+// thread static function
 afx_msg LRESULT DrawingView::OnDrawpop(WPARAM wParam, LPARAM lParam)
 {
 	PointData point;
@@ -327,7 +329,6 @@ afx_msg LRESULT DrawingView::OnDrawpop(WPARAM wParam, LPARAM lParam)
 	PointDataList::GetQueue()->Insert(this->Name, point);
 	return 0;
 }
-
 afx_msg LRESULT DrawingView::OnSenddraw(WPARAM wParam, LPARAM lParam)
 {
 	if (server != nullptr && client != nullptr)
@@ -360,12 +361,15 @@ afx_msg LRESULT DrawingView::OnSenddraw(WPARAM wParam, LPARAM lParam)
 		{
 			message[i] = send_message[i];
 		}
-		client->Send(message, DATA_SIZE);
+		int check = client->Send(message, DATA_SIZE);
+
+		if (check == -1)
+			MessageBox(_T("서버와 연결이 끊겼습니다"));
 	}
 	return 0;
 }
 
-
+// thread runner
 UINT DrawingView::threadReceiveQeueuRunner(LPVOID param)
 {
 	DrawingView* dv = (DrawingView*)param;
@@ -382,7 +386,6 @@ UINT DrawingView::threadReceiveQeueuRunner(LPVOID param)
 	}
 	return 0;
 }
-
 UINT DrawingView::threadSendQueueRunner(LPVOID param)
 {
 	DrawingView* dv = (DrawingView*)param;
@@ -400,6 +403,7 @@ UINT DrawingView::threadSendQueueRunner(LPVOID param)
 	return 0;
 }
 
+// client call
 bool DrawingView::ClientRun(CString ip, UINT port)
 {
 	if (server != nullptr)
@@ -426,7 +430,6 @@ bool DrawingView::ClientRun(CString ip, UINT port)
 		return false;
 	}
 }
-
 bool DrawingView::ClientClose()
 {
 	if (client != nullptr)
@@ -439,6 +442,7 @@ bool DrawingView::ClientClose()
 	return true;
 }
 
+// server call
 bool DrawingView::ServerRun(UINT port)
 {
 	if (client != nullptr && clientRunning)
@@ -479,7 +483,6 @@ bool DrawingView::ServerRun(UINT port)
 		return false;
 	}
 }
-
 bool DrawingView::ServerClose()
 {
 	if (server != nullptr)
@@ -495,18 +498,19 @@ bool DrawingView::ServerClose()
 	return true;
 }
 
+// show/hide call
 void DrawingView::DrawingViewStart()
 {
 	threadReceiveStatus = ThreadStatusRun;
 	threadSendStatus = ThreadStatusRun;
 }
-
 void DrawingView::DrawingViewPause()
 {
 	threadReceiveStatus = ThreadStatusPause;
 	threadSendStatus = ThreadStatusPause;
 }
 
+// drawing PointDataList
 void DrawingView::DrawingPoint()
 {
 	CClientDC dc(this);
@@ -589,4 +593,16 @@ void DrawingView::DrawingPoint()
 		iterator++;
 	}
 	pen.DeleteObject();
+}
+
+void DrawingView::OnShowWindow(BOOL bShow, UINT nStatus)
+{
+	CFormView::OnShowWindow(bShow, nStatus);
+
+	// TODO: 여기에 메시지 처리기 코드를 추가합니다.
+	if (bShow)
+	{
+		DrawingPoint();
+	}
+
 }
