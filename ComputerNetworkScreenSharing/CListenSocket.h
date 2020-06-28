@@ -15,4 +15,5 @@ public:
 	void CloseClientSocket(CSocket* client);
 	void BroadCast(void* message, int len);
 	void OnClose(int nErrorCode);
+	void CloseAllClient();
 };

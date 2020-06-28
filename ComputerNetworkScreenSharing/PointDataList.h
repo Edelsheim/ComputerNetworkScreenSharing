@@ -64,5 +64,13 @@ public:
 			return point_data_map.at(key);
 		}
 	}
+
+	void ClearWithKey(std::wstring key)
+	{
+		if (point_data_map.find(key) != point_data_map.end())
+		{
+			point_data_map.at(key).clear();
+		}
+	}
 };
 

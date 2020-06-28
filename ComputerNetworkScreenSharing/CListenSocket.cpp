@@ -145,6 +145,11 @@ void CListenSocket::BroadCast(void* message, int len)
 
 void CListenSocket::OnClose(int nErrorCode)
 {
+	CAsyncSocket::OnClose(nErrorCode);
+}
+
+void CListenSocket::CloseAllClient()
+{
 	POSITION pos;
 	pos = clientSocketList.GetHeadPosition();
 	CClient* client = nullptr;
@@ -154,10 +159,10 @@ void CListenSocket::OnClose(int nErrorCode)
 		client = (CClient*)clientSocketList.GetNext(pos);
 		if (client != nullptr)
 		{
+			client->ShutDown();
 			client->Close();
 		}
+		client = nullptr;
 	}
 	clientSocketList.RemoveAll();
-
-	CAsyncSocket::OnClose(nErrorCode);
 }
