@@ -7,13 +7,27 @@
 #include "pch.h"
 #include "PointData.h"
 typedef Concurrency::concurrent_vector<PointData> PointDataVector;
-typedef Concurrency::concurrent_unordered_map<std::wstring, PointDataVector> PointDataListMap;
+typedef Concurrency::concurrent_unordered_map<std::wstring, PointDataVector*> PointDataListMap;
 
 class PointDataList
 {
 private:
 	PointDataList() {};
-	~PointDataList() {};
+	~PointDataList() {
+		PointDataListMap::iterator a = point_data_map.begin();
+		while (1)
+		{
+			if (a == point_data_map.end())
+				break;
+
+			if (a->second != nullptr)
+				delete a->second;
+			a->second = nullptr;
+
+			a++;
+		}
+		point_data_map.clear();
+	};
 public:
 
 	static PointDataList* GetQueue() {
@@ -27,14 +41,15 @@ public:
 		if (point_data_map.find(key) == point_data_map.end())
 		{
 			// not found
-			PointDataVector vector;
-			vector.push_back(value);
+			PointDataVector *vector = new PointDataVector();
+			vector->push_back(value);
 			point_data_map.insert(std::make_pair(key, vector));
 		}
 		else
 		{
 			// found
-			point_data_map.at(key).push_back(value);
+			PointDataVector* vector = point_data_map.at(key);
+			vector->push_back(value);
 		}
 	}
 
@@ -51,17 +66,16 @@ public:
 		Insert(key, point_data);
 	}
 
-	const PointDataVector GetData(std::wstring key)
+	PointDataVector* GetData(std::wstring key)
 	{
-		PointDataVector empty_data;
-		empty_data.clear();
 		if (point_data_map.find(key) == point_data_map.end())
 		{
-			return empty_data;
+			return nullptr;
 		}
 		else
 		{
-			return point_data_map.at(key);
+			PointDataVector* a = point_data_map.at(key);
+			return a;
 		}
 	}
 
@@ -69,7 +83,7 @@ public:
 	{
 		if (point_data_map.find(key) != point_data_map.end())
 		{
-			point_data_map.at(key).clear();
+			point_data_map.at(key)->clear();
 		}
 	}
 };

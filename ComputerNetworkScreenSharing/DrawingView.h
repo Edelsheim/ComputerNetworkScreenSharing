@@ -90,6 +90,8 @@ private:
 	std::wstring Name;
 	CWinThread* threadReceiveQueue;
 	CWinThread* threadSendQueue;
+	CString serverIP;
+	UINT serverPort;
 };
 
 

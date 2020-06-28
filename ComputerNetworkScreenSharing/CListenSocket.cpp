@@ -85,11 +85,11 @@ void CListenSocket::OnAccept(int nErrorCode)
 
 			if (iterator->first.compare(L"내 공유 화면") == 0)
 			{
-				PointDataVector data = iterator->second;
-				PointDataVector::const_iterator data_iterator = data.cbegin();
+				PointDataVector* data = iterator->second;
+				PointDataVector::const_iterator data_iterator = data->cbegin();
 				while (1)
 				{
-					if (data_iterator == data.cend())
+					if (data_iterator == data->cend())
 						break;
 
 					PointData data = (*data_iterator);

@@ -26,6 +26,9 @@ void CClientSocket::OnReceive(int nErrorCode)
 	char data[DATA_SIZE + CLIENT_NAME_SIZE] = { 0, };
 	int len = 0;
 
+	CString ip;
+	UINT port = 0;
+
 	if ((len = Receive(data, sizeof(char) * (DATA_SIZE + CLIENT_NAME_SIZE))) > 0)
 	{
 		char type = data[0];

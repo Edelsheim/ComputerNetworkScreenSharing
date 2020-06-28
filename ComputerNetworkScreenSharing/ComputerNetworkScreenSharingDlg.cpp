@@ -556,6 +556,10 @@ void CComputerNetworkScreenSharingDlg::ProcessCtl(int processNum)
 					ButtonCloseProcessList[processNum]->SetWindowTextW(ConnectServerWString);
 					ButtonViewProcessList[processNum]->EnableWindow(FALSE);
 					ConnectList::GetConnectList()->RemoveWithProcessName(ProcessName[processNum]);
+
+					dwViewList[processNum]->DestroyWindow();
+					//delete dwViewList[processNum];
+					dwViewList[processNum] = nullptr;
 					MessageQueue::GetInstance()->Push(str);
 				}
 			}
