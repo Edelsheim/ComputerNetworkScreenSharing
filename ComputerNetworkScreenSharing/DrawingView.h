@@ -70,7 +70,7 @@ public:
 
 	void DrawingViewStart();
 	void DrawingViewPause();
-
+	void DrawingPoint();
 
 	// getter, setter
 	void SetName(std::wstring Name) { this->Name = std::wstring(Name.c_str()); };

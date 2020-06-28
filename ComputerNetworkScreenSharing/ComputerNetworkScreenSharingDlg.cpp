@@ -327,6 +327,12 @@ void CComputerNetworkScreenSharingDlg::ServerRun()
 			ButtonViewProcessList[i]->EnableWindow(TRUE);
 	}
 
+	if (ActiveProcessIndex != -1)
+	{
+		dwViewList[ActiveProcessIndex]->DrawingViewPause();
+		dwViewList[ActiveProcessIndex]->ShowWindow(SW_HIDE);
+	}
+
 	if (dwViewList[0] == nullptr)
 	{
 		dwViewList[0] = new DrawingView();
@@ -353,7 +359,7 @@ void CComputerNetworkScreenSharingDlg::ServerRun()
 		dwViewList[0]->ServerClose();
 		ServerRunButton.EnableWindow(TRUE);
 		ButtonViewProcessList[0]->EnableWindow(FALSE);
-		MessageQueue::GetInstance()->Push(L"화면 공유 작동 중지");
+		MessageQueue::GetInstance()->Push(L"포트번호 충돌!");
 	}
 }
 
@@ -367,18 +373,22 @@ void CComputerNetworkScreenSharingDlg::OnBnClickedServerrun()
 	else if (dwViewList[0]->serverRunning)
 	{
 		ServerRunButton.EnableWindow(FALSE);
-
-		dwViewList[0]->ServerClose();
-
 		MessageQueue::GetInstance()->Push(L"화면 공유 작동 중지");
 		ServerRunButton.SetWindowTextW(_T("내 화면 공유 켜기"));
 		ServerRunButton.EnableWindow(TRUE);
 
 		if (ActiveProcessIndex == 0)
+		{
 			ProcessTitle.SetWindowTextW(L"준비 중");
+			ActiveProcessIndex = -1;
+		}
 
 		ButtonViewProcessList[0]->EnableWindow(FALSE);
+
+		dwViewList[0]->ServerClose();
 		dwViewList[0]->ShowWindow(SW_HIDE);
+		dwViewList[0]->DestroyWindow();
+		dwViewList[0] = nullptr;
 	}
 	else
 	{
@@ -415,9 +425,9 @@ BOOL CComputerNetworkScreenSharingDlg::DestroyWindow()
 
 	if (log_thread != nullptr)
 	{
-		WaitForSingleObject(log_thread, 1000);
+		WaitForSingleObject(log_thread, 5000);
 	}
-	log_thread = nullptr;
+	//log_thread = nullptr;
 	return CDialogEx::DestroyWindow();
 }
 
@@ -425,8 +435,11 @@ void CComputerNetworkScreenSharingDlg::DrawingViewSwitch(int processNum)
 {
 	if (ActiveProcessIndex != -1)
 	{
-		dwViewList[ActiveProcessIndex]->DrawingViewPause();
-		dwViewList[ActiveProcessIndex]->ShowWindow(SW_HIDE);
+		if (dwViewList[ActiveProcessIndex] != nullptr)
+		{
+			dwViewList[ActiveProcessIndex]->DrawingViewPause();
+			dwViewList[ActiveProcessIndex]->ShowWindow(SW_HIDE);
+		}
 	}
 
 	if (dwViewList[processNum] == nullptr)
@@ -436,10 +449,9 @@ void CComputerNetworkScreenSharingDlg::DrawingViewSwitch(int processNum)
 		dwViewList[processNum]->OnInitialUpdate();
 		dwViewList[processNum]->SetName(ProcessName[processNum]);
 	}
-	dwViewList[processNum]->DrawingViewStart();
 	ProcessTitle.SetWindowTextW(ProcessName[processNum].c_str());
 	dwViewList[processNum]->ShowWindow(SW_SHOW);
-
+	dwViewList[processNum]->DrawingViewStart();
 	ActiveProcessIndex = processNum;
 }
 
@@ -476,7 +488,8 @@ void CComputerNetworkScreenSharingDlg::ProcessCtl(int processNum)
 		if (ProcessActive[i] == true)
 		{
 			ButtonViewProcessList[i]->EnableWindow(TRUE);
-			dwViewList[i]->ShowWindow(SW_HIDE);
+			if (dwViewList[i] != nullptr)
+				dwViewList[i]->ShowWindow(SW_HIDE);
 		}
 	}
 
@@ -486,7 +499,9 @@ void CComputerNetworkScreenSharingDlg::ProcessCtl(int processNum)
 		ProcessActive[processNum] = false;
 		ButtonCloseProcessList[processNum]->SetWindowTextW(ConnectServerWString);
 		ButtonViewProcessList[processNum]->EnableWindow(FALSE);
-		dwViewList[processNum]->DestroyWindow();
+
+		if (dwViewList[processNum] != nullptr)
+			dwViewList[processNum]->DestroyWindow();
 		dwViewList[processNum] = nullptr;
 
 		if (ActiveProcessIndex == processNum)
@@ -498,6 +513,7 @@ void CComputerNetworkScreenSharingDlg::ProcessCtl(int processNum)
 	}
 	else
 	{
+		// connect new process
 		ConnectDialog* dlg = new ConnectDialog;
 		if (dlg->DoModal() == IDOK)
 		{
