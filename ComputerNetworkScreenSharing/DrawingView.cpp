@@ -89,8 +89,11 @@ void DrawingView::OnInitialUpdate()
 	this->point.x = -1;
 	this->point.y = -1;
 
-	threadReceiveQueue = AfxBeginThread(threadReceiveQeueuRunner, this);
-	threadSendQueue = AfxBeginThread(threadSendQueueRunner, this);
+	if (threadReceiveQueue == nullptr)
+		threadReceiveQueue = AfxBeginThread(threadReceiveQeueuRunner, this);
+
+	if (threadSendQueue == nullptr)
+		threadSendQueue = AfxBeginThread(threadSendQueueRunner, this);
 }
 
 BOOL DrawingView::DestroyWindow()
@@ -534,6 +537,12 @@ void DrawingView::DrawingPoint()
 
 		PointData point = (*iterator);
 
+		if (server != nullptr)
+			DrawingQueue::GetReceiveQueue()->Push(point, "server");
+		else if (client != nullptr)
+			DrawingQueue::GetReceiveQueue()->Push(point, "client");
+		/*
+
 		// get client id
 		std::string client_id = std::string(point.id);
 
@@ -590,9 +599,12 @@ void DrawingView::DrawingPoint()
 			this->receivePointes.at(client_id).x = point.x;
 			this->receivePointes.at(client_id).y = point.y;
 		}
+
+		*/
 		iterator++;
 	}
 	pen.DeleteObject();
+	MessageQueue::GetInstance()->Push(L"DrawingPoint done");
 }
 
 void DrawingView::OnShowWindow(BOOL bShow, UINT nStatus)

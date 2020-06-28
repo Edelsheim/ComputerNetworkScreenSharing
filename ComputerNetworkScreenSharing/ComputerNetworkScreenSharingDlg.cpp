@@ -452,7 +452,7 @@ void CComputerNetworkScreenSharingDlg::DrawingViewSwitch(int processNum)
 	ProcessTitle.SetWindowTextW(ProcessName[processNum].c_str());
 	dwViewList[processNum]->DrawingViewStart();
 	dwViewList[processNum]->ShowWindow(SW_SHOW);
-	dwViewList[processNum]->UpdateWindow();
+	//dwViewList[processNum]->UpdateWindow();
 	ActiveProcessIndex = processNum;
 }
 
