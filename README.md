@@ -108,7 +108,8 @@ Process(Server 혹은 Client)가 PointData를 보내기(Send)와 받기(Receive)를
 활성화된 DrawingView가 Server/Client를 구분해 Server와 Client의 데이터가
 충돌하는 문제 해결.
 
-싱글턴 기반의 thread-safety 자료구조
+각 Process는 내부 변수로 Send, Receive, Draw를 가지고 있다.
+thread-safety 자료구조
 ```
 
 PointDataList.h
