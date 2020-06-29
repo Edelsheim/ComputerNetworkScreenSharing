@@ -9,18 +9,6 @@ private:
 	Concurrency::concurrent_queue<PointData> client_queue;
 	Concurrency::concurrent_queue<PointData> server_queue;
 public:
-	static DrawingQueue* GetReceiveQueue()
-	{
-		static DrawingQueue receiveQueue;
-		return &receiveQueue;
-	}
-
-	static DrawingQueue* GetSendQueue()
-	{
-		static DrawingQueue sendQueue;
-		return &sendQueue;
-	}
-
 	void Push(PointData point, std::string queueType)
 	{
 		if (queueType.compare("server") == 0)

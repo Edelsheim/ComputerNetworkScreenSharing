@@ -84,8 +84,8 @@ void CComputerNetworkScreenSharingDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_ViewProcess9, ButtonViewProcess9);
 	DDX_Control(pDX, IDC_ViewProcess10, ButtonViewProcess10);
 	DDX_Control(pDX, IDC_ClosePorcess1, ButtonCloseProcess1);
-	DDX_Control(pDX, IDC_ClosePorcess3, ButtonCloseProcess2);
-	DDX_Control(pDX, IDC_ClosePorcess2, ButtonCloseProcess3);
+	DDX_Control(pDX, IDC_ClosePorcess2, ButtonCloseProcess2);
+	DDX_Control(pDX, IDC_ClosePorcess3, ButtonCloseProcess3);
 	DDX_Control(pDX, IDC_ClosePorcess4, ButtonCloseProcess4);
 	DDX_Control(pDX, IDC_ClosePorcess5, ButtonCloseProcess5);
 	DDX_Control(pDX, IDC_ClosePorcess6, ButtonCloseProcess6);
@@ -452,7 +452,6 @@ void CComputerNetworkScreenSharingDlg::DrawingViewSwitch(int processNum)
 	ProcessTitle.SetWindowTextW(ProcessName[processNum].c_str());
 	dwViewList[processNum]->DrawingViewStart();
 	dwViewList[processNum]->ShowWindow(SW_SHOW);
-	//dwViewList[processNum]->UpdateWindow();
 	ActiveProcessIndex = processNum;
 }
 
@@ -557,6 +556,10 @@ void CComputerNetworkScreenSharingDlg::ProcessCtl(int processNum)
 					ButtonCloseProcessList[processNum]->SetWindowTextW(ConnectServerWString);
 					ButtonViewProcessList[processNum]->EnableWindow(FALSE);
 					ConnectList::GetConnectList()->RemoveWithProcessName(ProcessName[processNum]);
+
+					dwViewList[processNum]->DestroyWindow();
+					//delete dwViewList[processNum];
+					dwViewList[processNum] = nullptr;
 					MessageQueue::GetInstance()->Push(str);
 				}
 			}

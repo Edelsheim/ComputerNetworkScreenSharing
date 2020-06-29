@@ -2,7 +2,6 @@
 #include "CClient.h"
 #include "CListenSocket.h"
 
-#include "DrawingQueue.h"
 #include "ClientMap.h"
 
 CClient::CClient()
@@ -15,9 +14,10 @@ CClient::~CClient()
 
 }
 
-void CClient::SetListenSocket(CAsyncSocket* socket)
+void CClient::SetListenSocket(CAsyncSocket* socket, DrawingQueue* queue)
 {
 	serverSocket = socket;
+	this->queue = queue;
 }
 
 void CClient::OnClose(int nErrorCode)
@@ -84,7 +84,7 @@ void CClient::OnReceive(int nErrorCode)
 		point_data.x = point_x;
 		point_data.y = point_y;
 
-		DrawingQueue::GetReceiveQueue()->Push(point_data, "server");
+		queue->Push(point_data, "server");
 	}
 	CSocket::OnReceive(nErrorCode);
 }

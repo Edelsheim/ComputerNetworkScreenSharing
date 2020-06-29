@@ -164,12 +164,12 @@ void DrawingView::OnLButtonDown(UINT nFlags, CPoint point)
 		
 		// push to type is 'click'
 		id = ClientMap::GetClientMap()->GetValue(L"server");
-		DrawingQueue::GetSendQueue()->Push(point, CLICK_DATA, id, "server");
+		sendQueue.Push(point, CLICK_DATA, id, "server");
 		PointDataList::GetQueue()->Insert(this->Name, point, CLICK_DATA, id);
 	}
 	else if (client != nullptr)
 	{
-		DrawingQueue::GetSendQueue()->Push(point, CLICK_DATA, "", "client");
+		sendQueue.Push(point, CLICK_DATA, "", "client");
 	}
 
 	CFormView::OnLButtonDown(nFlags, point);
@@ -193,7 +193,7 @@ void DrawingView::OnMouseMove(UINT nFlags, CPoint point)
 		if (server != nullptr)
 		{
 			std::string id = ClientMap::GetClientMap()->GetValue(L"server");
-			DrawingQueue::GetSendQueue()->Push(point, MOVE_DATA, id, "server");
+			sendQueue.Push(point, MOVE_DATA, id, "server");
 
 			if (point.x <= my_rect.left + 3)
 			{
@@ -235,7 +235,7 @@ void DrawingView::OnMouseMove(UINT nFlags, CPoint point)
 		}
 		else if (client != nullptr)
 		{
-			DrawingQueue::GetSendQueue()->Push(point, MOVE_DATA, "", "client");
+			sendQueue.Push(point, MOVE_DATA, "", "client");
 		}
 	}
 	pen.DeleteObject();
@@ -246,12 +246,22 @@ void DrawingView::OnMouseMove(UINT nFlags, CPoint point)
 afx_msg LRESULT DrawingView::OnDrawpop(WPARAM wParam, LPARAM lParam)
 {
 	PointData point;
-	if (server != nullptr)
-		point = DrawingQueue::GetReceiveQueue()->Pop("server");
-	else if (client != nullptr)
-		point = DrawingQueue::GetReceiveQueue()->Pop("client");
+	bool isDraw = false;
+
+	point = drawQueue.Pop("");
+	if (point.x <= -1 || point.y <= -1)
+	{
+		if (server != nullptr)
+			point = receiveQueue.Pop("server");
+		else if (client != nullptr)
+			point = receiveQueue.Pop("client");
+		else
+			return 1;
+	}
 	else
-		return 1;
+	{
+		isDraw = true;
+	}
 
 	if (point.x <= -1 || point.y <= -1)
 		return 1;
@@ -278,58 +288,64 @@ afx_msg LRESULT DrawingView::OnDrawpop(WPARAM wParam, LPARAM lParam)
 		this->receivePointes.insert(std::make_pair(client_id, data));
 	}
 
-	if (point.type == 'c') // check type is 'click'
+	if (threadReceiveStatus == ThreadStatusRun)
 	{
-		dc.MoveTo(point.x, point.y);
-		this->receivePointes.at(client_id).x = point.x;
-		this->receivePointes.at(client_id).y = point.y;
-	}
-	else if (point.x <= my_rect.left + 2)
-	{
-		dc.MoveTo(my_rect.left, point.y);
-		dc.LineTo(point.x, point.y);
-		this->receivePointes.at(client_id).x = point.x;
-		this->receivePointes.at(client_id).y = point.y;
-	}
-	else if (point.x >= my_rect.right - 3)
-	{
-		dc.MoveTo(my_rect.right, point.y);
-		dc.LineTo(point.x, point.y);
-		this->receivePointes.at(client_id).x = point.x;
-		this->receivePointes.at(client_id).y = point.y;
-	}
-	else if (point.y <= my_rect.top + 3)
-	{
-		dc.MoveTo(point.x, my_rect.top);
-		dc.LineTo(point.x, point.y);
-		this->receivePointes.at(client_id).x = point.x;
-		this->receivePointes.at(client_id).y = point.y;
-	}
-	else if (point.y >= my_rect.bottom - 3)
-	{
-		dc.MoveTo(point.x, my_rect.bottom);
-		dc.LineTo(point.x, point.y);
-		this->receivePointes.at(client_id).x = point.x;
-		this->receivePointes.at(client_id).y = point.y;
-	}
-	else
-	{
-		LONG x = this->receivePointes.at(client_id).x;
-		LONG y = this->receivePointes.at(client_id).y;
+		if (point.type == 'c') // check type is 'click'
+		{
+			dc.MoveTo(point.x, point.y);
+			this->receivePointes.at(client_id).x = point.x;
+			this->receivePointes.at(client_id).y = point.y;
+		}
+		else if (point.x <= my_rect.left + 2)
+		{
+			dc.MoveTo(my_rect.left, point.y);
+			dc.LineTo(point.x, point.y);
+			this->receivePointes.at(client_id).x = point.x;
+			this->receivePointes.at(client_id).y = point.y;
+		}
+		else if (point.x >= my_rect.right - 3)
+		{
+			dc.MoveTo(my_rect.right, point.y);
+			dc.LineTo(point.x, point.y);
+			this->receivePointes.at(client_id).x = point.x;
+			this->receivePointes.at(client_id).y = point.y;
+		}
+		else if (point.y <= my_rect.top + 3)
+		{
+			dc.MoveTo(point.x, my_rect.top);
+			dc.LineTo(point.x, point.y);
+			this->receivePointes.at(client_id).x = point.x;
+			this->receivePointes.at(client_id).y = point.y;
+		}
+		else if (point.y >= my_rect.bottom - 3)
+		{
+			dc.MoveTo(point.x, my_rect.bottom);
+			dc.LineTo(point.x, point.y);
+			this->receivePointes.at(client_id).x = point.x;
+			this->receivePointes.at(client_id).y = point.y;
+		}
+		else
+		{
+			LONG x = this->receivePointes.at(client_id).x;
+			LONG y = this->receivePointes.at(client_id).y;
 
-		dc.MoveTo(x, y);
-		dc.LineTo(point.x, point.y);
-		this->receivePointes.at(client_id).x = point.x;
-		this->receivePointes.at(client_id).y = point.y;
+			dc.MoveTo(x, y);
+			dc.LineTo(point.x, point.y);
+			this->receivePointes.at(client_id).x = point.x;
+			this->receivePointes.at(client_id).y = point.y;
+		}
 	}
+	
 	pen.DeleteObject();
 
 	if (server != nullptr)
 	{
-		DrawingQueue::GetSendQueue()->Push(point, "server");
+		if (!isDraw)
+			sendQueue.Push(point, "server");
 	}
 
-	PointDataList::GetQueue()->Insert(this->Name, point);
+	if (!isDraw)
+		PointDataList::GetQueue()->Insert(this->Name, point);
 	return 0;
 }
 afx_msg LRESULT DrawingView::OnSenddraw(WPARAM wParam, LPARAM lParam)
@@ -339,9 +355,9 @@ afx_msg LRESULT DrawingView::OnSenddraw(WPARAM wParam, LPARAM lParam)
 
 	PointData point;
 	if (server != nullptr)
-		point = DrawingQueue::GetSendQueue()->Pop("server");
+		point = sendQueue.Pop("server");
 	else if (client != nullptr)
-		point = DrawingQueue::GetSendQueue()->Pop("client");
+		point = sendQueue.Pop("client");
 	else
 		return 1;
 
@@ -364,8 +380,8 @@ afx_msg LRESULT DrawingView::OnSenddraw(WPARAM wParam, LPARAM lParam)
 		{
 			message[i] = send_message[i];
 		}
-		int check = client->Send(message, DATA_SIZE);
-
+		//int check = client->Send(message, DATA_SIZE);
+		int check = client->SendToEx(message, DATA_SIZE, serverPort, serverIP);
 		if (check == -1)
 			MessageBox(_T("서버와 연결이 끊겼습니다"));
 	}
@@ -415,9 +431,11 @@ bool DrawingView::ClientRun(CString ip, UINT port)
 		return false;
 	}
 
-	client = new CClientSocket();
+	client = new CClientSocket(receiveQueue);
 	client->Create();
 
+	serverIP = ip;
+	serverPort = port;
 	BOOL check = client->Connect(ip, port);
 	if (check)
 	{
@@ -456,7 +474,7 @@ bool DrawingView::ServerRun(UINT port)
 
 	if (server == nullptr)
 	{
-		server = new CListenSocket;
+		server = new CListenSocket(receiveQueue);
 		if (server->Create(port, SOCK_STREAM))
 		{
 			if (server->Listen(5))
@@ -516,36 +534,93 @@ void DrawingView::DrawingViewPause()
 // drawing PointDataList
 void DrawingView::DrawingPoint()
 {
-	CClientDC dc(this);
-	CPen pen;
-
-	pen.CreatePen(PS_SOLID, 1, RGB(255, 0, 0));
-	dc.SelectObject(&pen);
-
-
-	// get this view rect
-	RECT my_rect;
-	GetClientRect(&my_rect);
-
-	const PointDataVector dataVector = PointDataList::GetQueue()->GetData(this->Name);
-	PointDataVector::const_iterator iterator = dataVector.cbegin();
-
-	while (1)
+	const PointDataVector *dataVector = PointDataList::GetQueue()->GetData(this->Name);
+	if (dataVector != nullptr)
 	{
-		if (iterator == dataVector.cend())
-			break;
+		//CClientDC dc(this);
+		//CPen pen;
 
-		PointData point = (*iterator);
+		//pen.CreatePen(PS_SOLID, 1, RGB(255, 0, 0));
+		//dc.SelectObject(&pen);
 
-		if (server != nullptr)
-			DrawingQueue::GetReceiveQueue()->Push(point, "server");
-		else if (client != nullptr)
-			DrawingQueue::GetReceiveQueue()->Push(point, "client");
+		//// get this view rect
+		//RECT my_rect;
+		//GetClientRect(&my_rect);
 
-		iterator++;
+		PointDataVector::const_iterator iterator = dataVector->cbegin();
+		while (1)
+		{
+			if (iterator == dataVector->cend())
+				break;
+
+			PointData point = (*iterator);
+
+			drawQueue.Push(point, "");
+
+			/*
+
+			// get client id
+			std::string client_id = std::string(point.id);
+
+			// new client
+			if (this->receivePointes.find(client_id) == this->receivePointes.end())
+			{
+				CPoint data;
+				data.x = point.x;
+				data.y = point.y;
+				this->receivePointes.insert(std::make_pair(client_id, data));
+			}
+
+			if (point.type == 'c') // check type is 'click'
+			{
+				dc.MoveTo(point.x, point.y);
+				this->receivePointes.at(client_id).x = point.x;
+				this->receivePointes.at(client_id).y = point.y;
+			}
+			else if (point.x <= my_rect.left + 2)
+			{
+				dc.MoveTo(my_rect.left, point.y);
+				dc.LineTo(point.x, point.y);
+				this->receivePointes.at(client_id).x = point.x;
+				this->receivePointes.at(client_id).y = point.y;
+			}
+			else if (point.x >= my_rect.right - 3)
+			{
+				dc.MoveTo(my_rect.right, point.y);
+				dc.LineTo(point.x, point.y);
+				this->receivePointes.at(client_id).x = point.x;
+				this->receivePointes.at(client_id).y = point.y;
+			}
+			else if (point.y <= my_rect.top + 3)
+			{
+				dc.MoveTo(point.x, my_rect.top);
+				dc.LineTo(point.x, point.y);
+				this->receivePointes.at(client_id).x = point.x;
+				this->receivePointes.at(client_id).y = point.y;
+			}
+			else if (point.y >= my_rect.bottom - 3)
+			{
+				dc.MoveTo(point.x, my_rect.bottom);
+				dc.LineTo(point.x, point.y);
+				this->receivePointes.at(client_id).x = point.x;
+				this->receivePointes.at(client_id).y = point.y;
+			}
+			else
+			{
+				LONG x = this->receivePointes.at(client_id).x;
+				LONG y = this->receivePointes.at(client_id).y;
+
+				dc.MoveTo(x, y);
+				dc.LineTo(point.x, point.y);
+				this->receivePointes.at(client_id).x = point.x;
+				this->receivePointes.at(client_id).y = point.y;
+			}
+			pen.DeleteObject();
+
+			*/
+			iterator++;
+		}
 	}
-	pen.DeleteObject();
-	MessageQueue::GetInstance()->Push(L"DrawingPoint done");
 }
 
 void DrawingView::OnShowWindow(BOOL bShow, UINT nStatus)
@@ -555,7 +630,11 @@ void DrawingView::OnShowWindow(BOOL bShow, UINT nStatus)
 	// TODO: 여기에 메시지 처리기 코드를 추가합니다.
 	if (bShow)
 	{
+		DrawingViewStart();
 		DrawingPoint();
 	}
-
+	else
+	{
+		DrawingViewPause();
+	}
 }
