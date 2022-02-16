@@ -9,12 +9,12 @@ IDE : Visual Studio 2019 (v142)
 Framework : C++ MFC (v142)
 ```
 
-Computer Network ¹× C++ MFC °øºÎ°â È­¸é º¸µå °øÀ¯ ÇÁ·ÎÁ§Æ®
+C++ MFC ê³µë¶€ê²¸ í™”ë©´ ë³´ë“œ ê³µìœ  í”„ë¡œì íŠ¸
 
 ```
-Server 1°³¿¡ N´ëÀÇ Client°¡ 1:N ¾ç¹æÇâ µ¥ÀÌÅÍ Àü¼Û ±¸Çö.
+Server 1ê°œì— NëŒ€ì˜ Clientê°€ 1:N ì–‘ë°©í–¥ ë°ì´í„° ì „ì†¡ êµ¬í˜„.
 
-»ç¿ëÀÚ´Â Server 1°³¿Í Client 10°³¸¦ ±¸µ¿ÇÒ ¼ö ÀÖ´Ù.
+ì‚¬ìš©ìžëŠ” Server 1ê°œì™€ Client 10ê°œë¥¼ êµ¬ë™í•  ìˆ˜ ìžˆë‹¤.
 ```
 
 ```
@@ -25,73 +25,73 @@ reference:
     Socket Client
     https://afsdzvcx123.tistory.com/99
 
-    dialog¿¡ FormView ºÙÀÌ±â
+    dialogì— FormView ë¶™ì´ê¸°
     https://luckygg.tistory.com/177
 
-    FormView ¹è°æÈ­¸é RGB º¯°æÇÏ±â
+    FormView ë°°ê²½í™”ë©´ RGB ë³€ê²½í•˜ê¸°
     http://egloos.zum.com/mindol/v/214184
 
-    ¸¶¿ì½º Drawing
+    ë§ˆìš°ìŠ¤ Drawing
     https://blog.naver.com/rkttndk/221434286381
 ```
 
 
-Server/Client µ¥ÀÌÅÍ Àü¼Û ±Ô°Ý
+Server/Client ë°ì´í„° ì „ì†¡ ê·œê²©
 ```
-server -> client Àü¼Û µ¥ÀÌÅÍ 24¹ÙÀÌÆ®
+server -> client ì „ì†¡ ë°ì´í„° 24ë°”ì´íŠ¸
 1 byte : event data. c == click, m == move
-10 bytes : CPoint data. ÁÂÇ¥ µ¥ÀÌÅÍ (1234, 5678) -> x1234y5678
+10 bytes : CPoint data. ì¢Œí‘œ ë°ì´í„° (1234, 5678) -> x1234y5678
 13 bytes : Client ID string. (12 bytes + \0)
 
-client -> server Àü¼Û µ¥ÀÌÅÍ 11¹ÙÀÌÆ®
+client -> server ì „ì†¡ ë°ì´í„° 11ë°”ì´íŠ¸
 1 byte : event data. c == click, m == move
-10 bytes : CPoint data. ÁÂÇ¥ µ¥ÀÌÅÍ (1234, 5678) -> x1234y5678
+10 bytes : CPoint data. ì¢Œí‘œ ë°ì´í„° (1234, 5678) -> x1234y5678
 ```
 
-±¸Á¶
+êµ¬ì¡°
 ```
-Main dialog¿¡¼­ 11°³(1°³ÀÇ Server¿Í 10°³ÀÇ Client)ÀÇ Drawing View¸¦ ¼ÒÀ¯.
+Main dialogì—ì„œ 11ê°œ(1ê°œì˜ Serverì™€ 10ê°œì˜ Client)ì˜ Drawing Viewë¥¼ ì†Œìœ .
 
-°¢ Drawing View´Â NameÀ» ÁöÁ¤.
+ê° Drawing ViewëŠ” Nameì„ ì§€ì •.
 
-Drawing View¸¦ º¯°æÇÒ°æ¿ì
-1. ±âÁ¸ È­¸é¿¡ Ãâ·ÂÇÏ°í ÀÖ´Â Drawing View¸¦ ÃÖ¼ÒÈ­.
-2. º¯°æÇÒ Drawing View¸¦ È°¼ºÈ­ ¹× Ãâ·Â.
-3. º¯°æµÈ Drawing View¿¡¼­ ÀúÀåµÈ PointData¸¦ Ãâ·Â.
+Drawing Viewë¥¼ ë³€ê²½í• ê²½ìš°
+1. ê¸°ì¡´ í™”ë©´ì— ì¶œë ¥í•˜ê³  ìžˆëŠ” Drawing Viewë¥¼ ìµœì†Œí™”.
+2. ë³€ê²½í•  Drawing Viewë¥¼ í™œì„±í™” ë° ì¶œë ¥.
+3. ë³€ê²½ëœ Drawing Viewì—ì„œ ì €ìž¥ëœ PointDataë¥¼ ì¶œë ¥.
 
-µ¥ÀÌÅÍ Àü¼Û ¹æ½Ä :
+ë°ì´í„° ì „ì†¡ ë°©ì‹ :
 Server :
-1. Server¿¡¼­ Draw
-2. Draw ÁÂÇ¥°è¸¦ ¿¬°áµÇ¾î ÀÖ´Â ClientÇÑÅ× BroadCast.
+1. Serverì—ì„œ Draw
+2. Draw ì¢Œí‘œê³„ë¥¼ ì—°ê²°ë˜ì–´ ìžˆëŠ” Clientí•œí…Œ BroadCast.
 
 Client :
-1. Client¿¡¼­ Draw ÁÂÇ¥°è¸¦ ServerÇÑÅ× Àü¼Û.
-2. Server¿¡¼­ ClientÀÇ Á¤º¸(IP:Port)¸¦ ±â¹ÝÀ¸·Î ÁÂÇ¥°è¸¦ ÀúÀå.
-3. Server¿¡ Draw
-4. Server°¡ ¿¬°áµÇ¾î ÀÖ´Â ClientÇÑÅ× BroadCast.
-5. Client(DrawÇÑ Clientµµ Æ÷ÇÔ)°¡ Draw.
+1. Clientì—ì„œ Draw ì¢Œí‘œê³„ë¥¼ Serverí•œí…Œ ì „ì†¡.
+2. Serverì—ì„œ Clientì˜ ì •ë³´(IP:Port)ë¥¼ ê¸°ë°˜ìœ¼ë¡œ ì¢Œí‘œê³„ë¥¼ ì €ìž¥.
+3. Serverì— Draw
+4. Serverê°€ ì—°ê²°ë˜ì–´ ìžˆëŠ” Clientí•œí…Œ BroadCast.
+5. Client(Drawí•œ Clientë„ í¬í•¨)ê°€ Draw.
 ```
 
 
-#  ¼Ò½ºÄÚµå ¼³¸í
+#  ì†ŒìŠ¤ì½”ë“œ ì„¤ëª…
 ## inline code
 
 MessageQueue.h
 ```
-Log µ¥ÀÌÅÍ¸¦ Ãâ·ÂÇÏ±â À§ÇØ »ç¿ë.
+Log ë°ì´í„°ë¥¼ ì¶œë ¥í•˜ê¸° ìœ„í•´ ì‚¬ìš©.
 
-½Ì±ÛÅÏ ±â¹ÝÀÇ thread-safety ÀÚ·á±¸Á¶
+ì‹±ê¸€í„´ ê¸°ë°˜ì˜ thread-safety ìžë£Œêµ¬ì¡°
 ```
 
 PointData.h
 ```
-CPointÀÇ µ¥ÀÌÅÍ x, y ÁÂÇ¥°ª, Å¬¸¯ ÁÂÇ¥¿Í
-¿òÁ÷ÀÌ´Â ÁÂÇ¥ ÆÇº° type, clientÀÇ id°ªÀ» ¼ÒÀ¯.
+CPointì˜ ë°ì´í„° x, y ì¢Œí‘œê°’, í´ë¦­ ì¢Œí‘œì™€
+ì›€ì§ì´ëŠ” ì¢Œí‘œ íŒë³„ type, clientì˜ idê°’ì„ ì†Œìœ .
 
-x -> LONG Å¸ÀÔ, x ÁÂÇ¥°è
-y -> LONG Å¸ÀÔ, y ÁÂÇ¥°è
-type -> char Å¸ÀÔ, 'c' : Å¬¸¯ ÁÂÇ¥°è, 'm' : ¿òÁ÷ÀÌ´Â ÁÂÇ¥°è
-id -> char[12], client id ¹®ÀÚ¿­(12ÀÚ¸®)
+x -> LONG íƒ€ìž…, x ì¢Œí‘œê³„
+y -> LONG íƒ€ìž…, y ì¢Œí‘œê³„
+type -> char íƒ€ìž…, 'c' : í´ë¦­ ì¢Œí‘œê³„, 'm' : ì›€ì§ì´ëŠ” ì¢Œí‘œê³„
+id -> char[12], client id ë¬¸ìžì—´(12ìžë¦¬)
 
 PointData data;
 data.x = (LONG)10;
@@ -102,79 +102,79 @@ data.type = 'c';
 
 DrawingQueue.h
 ```
-Process(Server È¤Àº Client)°¡ PointData¸¦ º¸³»±â(Send)¿Í ¹Þ±â(Receive)¸¦
-±¸ºÐÇÏ¿© º¸´Ù Á÷°üÀûÀ¸·Î µ¥ÀÌÅÍ¸¦ ÁÖ°í ¹ÞÀ» ¼ö ÀÖ°Ô Ã³¸®.
+Process(Server í˜¹ì€ Client)ê°€ PointDataë¥¼ ë³´ë‚´ê¸°(Send)ì™€ ë°›ê¸°(Receive)ë¥¼
+êµ¬ë¶„í•˜ì—¬ ë³´ë‹¤ ì§ê´€ì ìœ¼ë¡œ ë°ì´í„°ë¥¼ ì£¼ê³  ë°›ì„ ìˆ˜ ìžˆê²Œ ì²˜ë¦¬.
 
-È°¼ºÈ­µÈ DrawingView°¡ Server/Client¸¦ ±¸ºÐÇØ Server¿Í ClientÀÇ µ¥ÀÌÅÍ°¡
-Ãæµ¹ÇÏ´Â ¹®Á¦ ÇØ°á.
+í™œì„±í™”ëœ DrawingViewê°€ Server/Clientë¥¼ êµ¬ë¶„í•´ Serverì™€ Clientì˜ ë°ì´í„°ê°€
+ì¶©ëŒí•˜ëŠ” ë¬¸ì œ í•´ê²°.
 
-°¢ Process´Â ³»ºÎ º¯¼ö·Î Send, Receive, Draw¸¦ °¡Áö°í ÀÖ´Ù.
-thread-safety ÀÚ·á±¸Á¶
+ê° ProcessëŠ” ë‚´ë¶€ ë³€ìˆ˜ë¡œ Send, Receive, Drawë¥¼ ê°€ì§€ê³  ìžˆë‹¤.
+thread-safety ìžë£Œêµ¬ì¡°
 ```
 
 PointDataList.h
 ```
-PointData¸¦ Process ÀÌ¸§(DrawingView.h¿¡ Name)À» ±â¹Ý(key)À¸·Î
-¼øÂ÷ÀûÀ¸·Î ÀúÀå.
+PointDataë¥¼ Process ì´ë¦„(DrawingView.hì— Name)ì„ ê¸°ë°˜(key)ìœ¼ë¡œ
+ìˆœì°¨ì ìœ¼ë¡œ ì €ìž¥.
 
-½Ì±ÛÅÏ ±â¹ÝÀÇ thread-safety ÀÚ·á±¸Á¶
+ì‹±ê¸€í„´ ê¸°ë°˜ì˜ thread-safety ìžë£Œêµ¬ì¡°
 ```
 
 ClientMap.h
 ```
-Server¿¡¼­ Client¸¦ ±¸º°ÇÏ±â À§ÇØ Client°¡ Á¢¼Ó ½ÃµµÇÒ °æ¿ì
-Server¿¡¼­ ClientÀÇ IP¿Í Port(Client°¡ Connect ÇÒ¶§¸¶´Ù Port°¡ º¯°æµÊ)¸¦
-ÀÏÁ¤ÇÑ ÆÐÅÏÀ¸·Î ÀúÀå.
+Serverì—ì„œ Clientë¥¼ êµ¬ë³„í•˜ê¸° ìœ„í•´ Clientê°€ ì ‘ì† ì‹œë„í•  ê²½ìš°
+Serverì—ì„œ Clientì˜ IPì™€ Port(Clientê°€ Connect í• ë•Œë§ˆë‹¤ Portê°€ ë³€ê²½ë¨)ë¥¼
+ì¼ì •í•œ íŒ¨í„´ìœ¼ë¡œ ì €ìž¥.
 
-½Ì±ÛÅÏ ±â¹ÝÀÇ thread-safety ÀÚ·á±¸Á¶
+ì‹±ê¸€í„´ ê¸°ë°˜ì˜ thread-safety ìžë£Œêµ¬ì¡°
 ```
 
 ConnectList.h
 ```
-Process(Client)°¡ Áßº¹µÈ Server·Î ¿¬°áÀ» ¹æÁöÇÏ±âÀ§ÇØ
-°¢ Process(Client) ÀÌ¸§¸¶´Ù ¿¬°áÇÑ ServerÀÇ IP:PORT ¸¦ ±â·Ï.
+Process(Client)ê°€ ì¤‘ë³µëœ Serverë¡œ ì—°ê²°ì„ ë°©ì§€í•˜ê¸°ìœ„í•´
+ê° Process(Client) ì´ë¦„ë§ˆë‹¤ ì—°ê²°í•œ Serverì˜ IP:PORT ë¥¼ ê¸°ë¡.
 
-½Ì±ÛÅÏ ±â¹ÝÀÇ thread-safety ÀÚ·á±¸Á¶
+ì‹±ê¸€í„´ ê¸°ë°˜ì˜ thread-safety ìžë£Œêµ¬ì¡°
 ```
 
 ## socket code
 
 CClient
 ```
-CSocket¸¦ »ó¼Ó¹ÞÀº Client Å¬·¡½º.
+CSocketë¥¼ ìƒì†ë°›ì€ Client í´ëž˜ìŠ¤.
 
-ListenSocket¿¡ AcceptÇØ¿Â Client¸¦ ÀúÀå.
+ListenSocketì— Acceptí•´ì˜¨ Clientë¥¼ ì €ìž¥.
 ```
 
 CListenSocket
 ```
-CAsyncSocket¸¦ »ó¼Ó¹ÞÀº Socket Server Å¬·¡½º.
+CAsyncSocketë¥¼ ìƒì†ë°›ì€ Socket Server í´ëž˜ìŠ¤.
 
-OnAccept¿¡¼­ °¨ÁöµÈ Client¸¦ ÀúÀå.
-Client¿¡°Ô µ¥ÀÌÅÍ¸¦ Àü¼ÛÇÏ±âÀ§ÇÑ BroadCast ±â´É.
+OnAcceptì—ì„œ ê°ì§€ëœ Clientë¥¼ ì €ìž¥.
+Clientì—ê²Œ ë°ì´í„°ë¥¼ ì „ì†¡í•˜ê¸°ìœ„í•œ BroadCast ê¸°ëŠ¥.
 ```
 
 CClientSocket
 ```
-CSocket¸¦ »ó¼Ó¹ÞÀº Socket Client Å¬·¡½º.
+CSocketë¥¼ ìƒì†ë°›ì€ Socket Client í´ëž˜ìŠ¤.
 
-Socket Server¿¡¼­ º¸³»¿Â µ¥ÀÌÅÍ¸¦ ¹Þ¾Æ
-DrawingQueue::GetReceiveQueue()->Push ÁøÇà.
+Socket Serverì—ì„œ ë³´ë‚´ì˜¨ ë°ì´í„°ë¥¼ ë°›ì•„
+DrawingQueue::GetReceiveQueue()->Push ì§„í–‰.
 ```
 
 ## view code
 
 DrawingView
 ```
-CFormView¸¦ »ó¼Ó¹ÞÀº ±×¸² ±×¸®´Â µµÈ­Áö View
+CFormViewë¥¼ ìƒì†ë°›ì€ ê·¸ë¦¼ ê·¸ë¦¬ëŠ” ë„í™”ì§€ View
 
-Name º¯¼ö·Î °¢ Drawing View¸¶´Ù °¢ÀÚÀÇ ÀÌ¸§À» ÁöÁ¤.
+Name ë³€ìˆ˜ë¡œ ê° Drawing Viewë§ˆë‹¤ ê°ìžì˜ ì´ë¦„ì„ ì§€ì •.
 
-±âº» ¿ªÇÒ :
-    ¸¶¿ì½º ÁÂÅ¬¸¯, ÁÂÅ¬¸¯Áß ¿òÁ÷ÀÌ´Â ¸¶¿ì½º Æ÷ÀÎÅÍ¸¦ µû¶ó È­¸é¿¡ ±×¸²À» ±×·ÁÁÖ´Â view.
-Socket Server°¡ È°¼ºÈ£ µÉ °æ¿ì DrawingQueue::GetSendQueue()->Push()À» ÅëÇØ
-¿¬°áµÈ ClientÇÑÅ× µ¥ÀÌÅÍ¸¦ Àü´ÞÇÑ´Ù.
+ê¸°ë³¸ ì—­í•  :
+    ë§ˆìš°ìŠ¤ ì¢Œí´ë¦­, ì¢Œí´ë¦­ì¤‘ ì›€ì§ì´ëŠ” ë§ˆìš°ìŠ¤ í¬ì¸í„°ë¥¼ ë”°ë¼ í™”ë©´ì— ê·¸ë¦¼ì„ ê·¸ë ¤ì£¼ëŠ” view.
+Socket Serverê°€ í™œì„±í˜¸ ë  ê²½ìš° DrawingQueue::GetSendQueue()->Push()ì„ í†µí•´
+ì—°ê²°ëœ Clientí•œí…Œ ë°ì´í„°ë¥¼ ì „ë‹¬í•œë‹¤.
 
-Socket Client°¡ È°¼ºÈ­ µÉ °æ¿ì DrawingQueue::GetReceiveQueue()->Pop()À» ÅëÇØ
-Server°¡ Àü´ÞÇØÁØ µ¥ÀÌÅÍ¸¦ ±â¹ÝÀ¸·Î È­¸é¿¡ ±×·ÁÁØ´Ù.
+Socket Clientê°€ í™œì„±í™” ë  ê²½ìš° DrawingQueue::GetReceiveQueue()->Pop()ì„ í†µí•´
+Serverê°€ ì „ë‹¬í•´ì¤€ ë°ì´í„°ë¥¼ ê¸°ë°˜ìœ¼ë¡œ í™”ë©´ì— ê·¸ë ¤ì¤€ë‹¤.
 ```
