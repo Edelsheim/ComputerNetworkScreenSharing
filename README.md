@@ -74,13 +74,10 @@ Client :
 
 
 #  소스코드 설명
-## inline code
 
 MessageQueue.h
 ```
 Log 데이터를 출력하기 위해 사용.
-
-싱글턴 기반의 thread-safety 자료구조
 ```
 
 PointData.h
@@ -108,16 +105,13 @@ Process(Server 혹은 Client)가 PointData를 보내기(Send)와 받기(Receive)
 활성화된 DrawingView가 Server/Client를 구분해 Server와 Client의 데이터가
 충돌하는 문제 해결.
 
-각 Process는 내부 변수로 Send, Receive, Draw를 가지고 있다.
-thread-safety 자료구조
+각 Process는 내부 변수로 Send, Receive, Draw를 소유.
 ```
 
 PointDataList.h
 ```
 PointData를 Process 이름(DrawingView.h에 Name)을 기반(key)으로
 순차적으로 저장.
-
-싱글턴 기반의 thread-safety 자료구조
 ```
 
 ClientMap.h
@@ -125,16 +119,12 @@ ClientMap.h
 Server에서 Client를 구별하기 위해 Client가 접속 시도할 경우
 Server에서 Client의 IP와 Port(Client가 Connect 할때마다 Port가 변경됨)를
 일정한 패턴으로 저장.
-
-싱글턴 기반의 thread-safety 자료구조
 ```
 
 ConnectList.h
 ```
 Process(Client)가 중복된 Server로 연결을 방지하기위해
 각 Process(Client) 이름마다 연결한 Server의 IP:PORT 를 기록.
-
-싱글턴 기반의 thread-safety 자료구조
 ```
 
 ## socket code
